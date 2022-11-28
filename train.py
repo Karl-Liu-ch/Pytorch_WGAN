@@ -1,6 +1,6 @@
 from Data_loader import *
-from WGAN_models import WGAN
-from DCGAN_models import DCGAN
+from WGAN.WGAN_models import WGAN
+from DCGAN.DCGAN_models import DCGAN
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-m', '--model', type=str, default="DCGAN", choices=['DCGAN', 'WGAN', 'SN_WGAN', 'WGAN_GP'])

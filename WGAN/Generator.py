@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../')
 import torch.nn as nn
-from ResNet import ResNet
+from DCGAN.ResNet import ResNet
 
 class Generator_28(nn.Module):
     def __init__(self, num_input, num_output):

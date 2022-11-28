@@ -2,7 +2,7 @@ import sys
 sys.path.append('../')
 import torch
 import torch.nn as nn
-from ResNet import ResNet
+from DCGAN.ResNet import ResNet
 
 class Discriminator_Res(nn.Module):
     def __init__(self, input_nums):

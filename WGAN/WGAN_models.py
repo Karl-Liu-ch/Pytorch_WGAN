@@ -1,8 +1,10 @@
+import sys
+sys.path.append('../')
 import torch
 import os
 from torch.autograd import Variable
 from torch import autograd
-from WGAN.Data_loader import train_loader_cifar, train_loader_mnist, train_loader_fashionmnist
+from Data_loader import train_loader_cifar, train_loader_mnist, train_loader_fashionmnist
 from torchvision import utils
 from WGAN.Generator import Generator_Res, Generator_28, Generator_32
 from WGAN.Discriminator import Discriminator_Res, Discriminator_wgan_28, Discriminator_wgan_32, \

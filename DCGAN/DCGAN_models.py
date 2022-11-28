@@ -1,9 +1,9 @@
 import sys
 sys.path.append('../')
-from Generator import *
-from Discriminator import *
+from DCGAN.Generator import *
+from DCGAN.Discriminator import *
 from Data_loader import train_loader_cifar, train_loader_mnist, train_loader_fashionmnist
-from get_fid_score import get_fid
+from DCGAN.get_fid_score import get_fid
 import os
 from torchvision import utils
 import torchvision.transforms as transforms
