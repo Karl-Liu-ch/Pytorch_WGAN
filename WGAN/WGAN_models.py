@@ -65,6 +65,7 @@ class WGAN():
             if self.gradient_penalty:
                 self.path += '_GP'
         self.path += '_' + train_set + '_' + self.iter + '/'
+        self.checkpoint = 'checkpoint/'
         self.optim_G = torch.optim.RMSprop(self.G.parameters(), lr=5e-5)
         self.optim_D = torch.optim.RMSprop(self.D.parameters(), lr=5e-5)
         print(self.D)
@@ -94,7 +95,7 @@ class WGAN():
     def train(self, train_loader):
         print(self.path)
         try:
-            os.mkdir('../checkpoint/' + self.path)
+            os.mkdir(self.checkpoint + self.path)
         except:
             pass
         try:
@@ -166,11 +167,11 @@ class WGAN():
                     "optimizer_G": self.optim_G.state_dict(),
                     "losses_G": self.G_losses,
                     "FID scores": self.fid_score,
-                    "Best FID score": self.best_fid}, "../checkpoint/"+self.path+"G.pth")
+                    "Best FID score": self.best_fid}, self.checkpoint+self.path+"G.pth")
         torch.save({"D_state_dict": self.D.state_dict(),
                     "optimizer_D": self.optim_D.state_dict(),
                     "losses_fake": self.Fake_losses,
-                    "losses_real": self.Real_losses}, "../checkpoint/"+self.path+"D.pth")
+                    "losses_real": self.Real_losses}, self.checkpoint+self.path+"D.pth")
         if self.epoch == self.maxepochs:
             torch.save({"epoch": self.epoch,
                         "G_state_dict": self.G.state_dict(),
@@ -178,16 +179,16 @@ class WGAN():
                         "optimizer_G": self.optim_G.state_dict(),
                         "losses_G": self.G_losses,
                         "FID scores": self.fid_score,
-                        "Best FID score": self.best_fid}, "../checkpoint/"+self.path+"G_{}.pth")
+                        "Best FID score": self.best_fid}, self.checkpoint+self.path+"G_{}.pth")
             torch.save({"D_state_dict": self.D.state_dict(),
                         "optimizer_D": self.optim_D.state_dict(),
                         "losses_fake": self.Fake_losses,
-                        "losses_real": self.Real_losses}, "../checkpoint/"+self.path+"D_{}.pth".format(self.epoch))
+                        "losses_real": self.Real_losses}, self.checkpoint+self.path+"D_{}.pth".format(self.epoch))
         print("model saved! path: "+self.path)
 
     def load(self):
-        checkpoint_G = torch.load("../checkpoint/"+self.path+"G.pth")
-        checkpoint_D = torch.load("../checkpoint/"+self.path+"D.pth")
+        checkpoint_G = torch.load(self.checkpoint+self.path+"G.pth")
+        checkpoint_D = torch.load(self.checkpoint+self.path+"D.pth")
         self.epoch = checkpoint_G["epoch"]
         self.G.load_state_dict(checkpoint_G["G_state_dict"])
         self.G_best.load_state_dict(checkpoint_G["G_best_state_dict"])
@@ -217,7 +218,7 @@ class WGAN():
         else:
             path = root + '_FashionMNIST/'
         try:
-            os.mkdir('../Results/'+path)
+            os.mkdir('Results/'+path)
         except:
             pass
         with torch.no_grad():
@@ -225,7 +226,7 @@ class WGAN():
             fake_img = fake_img.data.cpu()
             fake_img = fake_img.mul(0.5).add(0.5)
             grid = utils.make_grid(fake_img)
-            utils.save_image(grid, '../Results/'+path+'img_generatori_iter_{}.png'.format(self.epoch))
+            utils.save_image(grid, 'Results/'+path+'img_generatori_iter_{}.png'.format(self.epoch))
 
 if __name__ == '__main__':
     # Train CIFAR on WGAN 3 times.
