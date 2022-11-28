@@ -38,11 +38,6 @@ class DCGAN():
         self.best_fid = 1e10
         self.train_set = train_set
         if train_set == "CIFAR":
-            self.invTrans = transforms.Compose([ transforms.Normalize(mean = [ 0., 0., 0. ],
-                                                     std = [ 1/0.247, 1/0.243, 1/0.261 ]),
-                                transforms.Normalize(mean = [ -0.4914, -0.4822, -0.4465 ],
-                                                     std = [ 1., 1., 1. ]),
-                               ])
             self.output_ch = 3
             if ResNet:
                 self.path += "_" + "Res"
@@ -54,11 +49,6 @@ class DCGAN():
                 self.G_best = Generator_32(100, self.output_ch).to(device)
                 self.D = Discriminator_32(self.output_ch).to(device)
         else:
-            self.invTrans = transforms.Compose([transforms.Normalize(mean=[0.],
-                                                                     std=[1 / 0.5]),
-                                                transforms.Normalize(mean=[-0.5],
-                                                                     std=[1.]),
-                                                ])
             self.output_ch = 1
             self.G = Generator_28(100, self.output_ch).to(device)
             self.G_best = Generator_28(100, self.output_ch).to(device)
@@ -177,7 +167,7 @@ class DCGAN():
         with torch.no_grad():
             fake_img = self.G(z)
             fake_img = fake_img.data.cpu()
-            fake_img = self.invTrans(fake_img)
+            fake_img = fake_img.mul(0.5).add(0.5)
             grid = utils.make_grid(fake_img)
             utils.save_image(grid, '../Results/'+path+'img_generatori_iter_{}.png'.format(self.epoch))
 

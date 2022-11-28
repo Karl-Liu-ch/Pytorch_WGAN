@@ -33,19 +33,9 @@ class WGAN():
         if train_set == 'CIFAR':
             self.img_size = 32
             self.output_ch = 3
-            self.invTrans = transforms.Compose([ transforms.Normalize(mean = [ 0., 0., 0. ],
-                                                     std = [ 1/0.247, 1/0.243, 1/0.261 ]),
-                                transforms.Normalize(mean = [ -0.4914, -0.4822, -0.4465 ],
-                                                     std = [ 1., 1., 1. ]),
-                               ])
         else:
             self.img_size = 28
             self.output_ch = 1
-            self.invTrans = transforms.Compose([transforms.Normalize(mean=[0.],
-                                                                     std=[1 / 0.5]),
-                                                transforms.Normalize(mean=[-0.5],
-                                                                     std=[1.]),
-                                                ])
         if ResNet:
             self.path += '_ResNet'
             self.G = Generator_Res(100, self.output_ch).to(device)
@@ -233,7 +223,7 @@ class WGAN():
         with torch.no_grad():
             fake_img = self.G(z)
             fake_img = fake_img.data.cpu()
-            fake_img = self.invTrans(fake_img)
+            fake_img = fake_img.mul(0.5).add(0.5)
             grid = utils.make_grid(fake_img)
             utils.save_image(grid, '../Results/'+path+'img_generatori_iter_{}.png'.format(self.epoch))
 
