@@ -31,6 +31,11 @@ class WGAN():
         self.iter = str(int(iter))
         self.path = 'WGAN'
         if train_set == 'CIFAR':
+            self.invTrans = transforms.Compose([transforms.Normalize(mean=[0., 0., 0.],
+                                                                     std=[1 / 0.247, 1 / 0.243, 1 / 0.261]),
+                                                transforms.Normalize(mean=[-0.4914, -0.4822, -0.4465],
+                                                                     std=[1., 1., 1.]),
+                                                ])
             self.img_size = 32
             self.output_ch = 3
         else:
@@ -224,7 +229,10 @@ class WGAN():
         with torch.no_grad():
             fake_img = self.G(z)
             fake_img = fake_img.data.cpu()
-            fake_img = fake_img.mul(0.5).add(0.5)
+            if self.train_set == "CIFAR":
+                fake_img = self.invTrans(fake_img)
+            else:
+                fake_img = fake_img.mul(0.5).add(0.5)
             grid = utils.make_grid(fake_img)
             utils.save_image(grid, 'Results/'+path+'img_generatori_iter_{}.png'.format(self.epoch))
 
