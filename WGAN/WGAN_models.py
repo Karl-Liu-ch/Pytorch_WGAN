@@ -69,6 +69,18 @@ class WGAN():
                     self.D = Discriminator_wgan_32(self.output_ch).to(device)
             if self.gradient_penalty:
                 self.path += '_GP'
+        if train_set == "MNIST":
+            self.invTrans = transforms.Compose([transforms.Normalize(mean=[0.],
+                                                                     std=[1 / 0.1306]),
+                                                transforms.Normalize(mean=[-0.4914],
+                                                                     std=[1.]),
+                                                ])
+        if train_set == "FashionMNIST":
+            self.invTrans = transforms.Compose([transforms.Normalize(mean=[0.],
+                                                                     std=[1 / 0.353]),
+                                                transforms.Normalize(mean=[-0.286],
+                                                                     std=[1.]),
+                                                ])
         self.path += '_' + train_set + '_' + self.iter + '/'
         self.checkpoint = 'checkpoint/'
         self.optim_G = torch.optim.RMSprop(self.G.parameters(), lr=5e-5)

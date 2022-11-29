@@ -58,6 +58,18 @@ class DCGAN():
             self.G = Generator_28(100, self.output_ch).to(device)
             self.G_best = Generator_28(100, self.output_ch).to(device)
             self.D = Discriminator_28(self.output_ch).to(device)
+        if train_set == "MNIST":
+            self.invTrans = transforms.Compose([transforms.Normalize(mean=[0.],
+                                                                     std=[1 / 0.1306]),
+                                                transforms.Normalize(mean=[-0.4914],
+                                                                     std=[1.]),
+                                                ])
+        if train_set == "FashionMNIST":
+            self.invTrans = transforms.Compose([transforms.Normalize(mean=[0.],
+                                                                     std=[1 / 0.353]),
+                                                transforms.Normalize(mean=[-0.286],
+                                                                     std=[1.]),
+                                                ])
         self.path += "_" + train_set + self.iter + '/'
         self.optim_G = torch.optim.Adam(self.G.parameters(),lr=1e-4, betas=(0.5, 0.999))
         self.optim_D = torch.optim.Adam(self.D.parameters(),lr=1e-4, betas=(0.5, 0.999))
