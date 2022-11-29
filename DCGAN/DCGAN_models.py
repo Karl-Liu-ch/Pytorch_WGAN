@@ -26,6 +26,7 @@ def weights_init(m):
 
 class DCGAN():
     def __init__(self, ResNet = False, train_set = "CIFAR", iter = 0):
+        self.ResNet = ResNet
         self.iter = str(int(iter))
         self.path = 'DCGAN'
         self.epoch = 0
@@ -170,6 +171,8 @@ class DCGAN():
 
     def evaluate(self):
         root = 'DCGAN'
+        if self.ResNet:
+            root += "_Res"
         if self.train_set == "CIFAR":
             path = root + '_CIFAR/'
         elif self.train_set == "MNIST":

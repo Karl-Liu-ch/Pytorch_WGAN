@@ -15,6 +15,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 class WGAN():
     def __init__(self, ResNet = False, gradient_penalty = False, spectral_norm = False, train_set = 'MNIST', iter = 0):
+        self.ResNet = ResNet
         self.epoch = 0
         self.maxepochs = int(1e3)
         self.G_losses = []
@@ -228,6 +229,8 @@ class WGAN():
             root = 'WGAN_GP'
         else:
             root = 'WGAN'
+        if self.ResNet:
+            root += "_Res"
         if self.train_set == "CIFAR":
             path = root + '_CIFAR/'
         elif self.train_set == "MNIST":
