@@ -29,39 +29,39 @@ if __name__ == '__main__':
     elif MODEL == 'WGAN':
         if DATASET == 'CIFAR':
             for i in range(iter):
-                _WGAN = WGAN(ResNet=resnet, gradient_penalty=False, spectral_norm=False, train_set='CIFAR', iter=0)
+                _WGAN = WGAN(ResNet=resnet, gradient_penalty=False, spectral_norm=False, train_set='CIFAR', iter=i)
                 _WGAN.train(train_loader_cifar)
         elif DATASET == 'MNIST':
             for i in range(iter):
-                _WGAN = WGAN(ResNet=resnet, gradient_penalty=False, spectral_norm=False, train_set='MNIST', iter=0)
+                _WGAN = WGAN(ResNet=resnet, gradient_penalty=False, spectral_norm=False, train_set='MNIST', iter=i)
                 _WGAN.train(train_loader_mnist)
         else:
             for i in range(iter):
-                _WGAN = WGAN(ResNet=resnet, gradient_penalty=False, spectral_norm=False, train_set='FashionMNIST', iter=0)
+                _WGAN = WGAN(ResNet=resnet, gradient_penalty=False, spectral_norm=False, train_set='FashionMNIST', iter=i)
                 _WGAN.train(train_loader_fashionmnist)
     elif MODEL == 'SN_WGAN':
         if DATASET == 'CIFAR':
             for i in range(iter):
-                _WGAN = WGAN(ResNet=resnet, gradient_penalty=False, spectral_norm=True, train_set='CIFAR', iter=0)
+                _WGAN = WGAN(ResNet=resnet, gradient_penalty=False, spectral_norm=True, train_set='CIFAR', iter=i)
                 _WGAN.train(train_loader_cifar)
         elif DATASET == 'MNIST':
             for i in range(iter):
-                _WGAN = WGAN(ResNet=resnet, gradient_penalty=False, spectral_norm=True, train_set='MNIST', iter=0)
+                _WGAN = WGAN(ResNet=resnet, gradient_penalty=False, spectral_norm=True, train_set='MNIST', iter=i)
                 _WGAN.train(train_loader_mnist)
         else:
             for i in range(iter):
-                _WGAN = WGAN(ResNet=resnet, gradient_penalty=False, spectral_norm=True, train_set='FashionMNIST', iter=0)
+                _WGAN = WGAN(ResNet=resnet, gradient_penalty=False, spectral_norm=True, train_set='FashionMNIST', iter=i)
                 _WGAN.train(train_loader_fashionmnist)
     elif MODEL == 'WGAN_GP':
         if DATASET == 'CIFAR':
             for i in range(iter):
-                _WGAN = WGAN(ResNet=resnet, gradient_penalty=True, spectral_norm=False, train_set='CIFAR', iter=0)
+                _WGAN = WGAN(ResNet=resnet, gradient_penalty=True, spectral_norm=False, train_set='CIFAR', iter=i)
                 _WGAN.train(train_loader_cifar)
         elif DATASET == 'MNIST':
             for i in range(iter):
-                _WGAN = WGAN(ResNet=resnet, gradient_penalty=True, spectral_norm=False, train_set='MNIST', iter=0)
+                _WGAN = WGAN(ResNet=resnet, gradient_penalty=True, spectral_norm=False, train_set='MNIST', iter=i)
                 _WGAN.train(train_loader_mnist)
         else:
             for i in range(iter):
-                _WGAN = WGAN(ResNet=resnet, gradient_penalty=True, spectral_norm=False, train_set='FashionMNIST', iter=0)
+                _WGAN = WGAN(ResNet=resnet, gradient_penalty=True, spectral_norm=False, train_set='FashionMNIST', iter=i)
                 _WGAN.train(train_loader_fashionmnist)
