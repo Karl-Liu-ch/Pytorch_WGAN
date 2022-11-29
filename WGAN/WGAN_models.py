@@ -197,7 +197,7 @@ class WGAN():
                         "optimizer_G": self.optim_G.state_dict(),
                         "losses_G": self.G_losses,
                         "FID scores": self.fid_score,
-                        "Best FID score": self.best_fid}, self.checkpoint+self.path+"G_{}.pth")
+                        "Best FID score": self.best_fid}, self.checkpoint+self.path+"G_{}.pth".format(self.epoch))
             torch.save({"D_state_dict": self.D.state_dict(),
                         "optimizer_D": self.optim_D.state_dict(),
                         "losses_fake": self.Fake_losses,
