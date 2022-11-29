@@ -34,16 +34,16 @@ class ResNet(nn.Module):
             nn.BatchNorm2d(out_channel),
             nn.ReLU()
         )
-        self.Conv_x = nn.Sequential(
-            nn.Conv2d(in_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=1),
-            nn.BatchNorm2d(out_channel),
-            nn.ReLU()
-        )
+        # self.Conv_x = nn.Sequential(
+        #     nn.Conv2d(in_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=1),
+        #     nn.BatchNorm2d(out_channel),
+        #     nn.ReLU()
+        # )
         self.blk1 = Res_Block(out_channel, out_channel)
         self.blk2 = Res_Block(out_channel, out_channel)
         self.blk3 = Res_Block(out_channel, out_channel)
         self.blk4 = Res_Block(out_channel, out_channel)
-        self.Relu = nn.ReLU()
+        # self.Relu = nn.ReLU()
 
     def forward(self, x):
         out = self.Conv(x)
@@ -92,15 +92,15 @@ class ResNet_D(nn.Module):
             nn.utils.parametrizations.spectral_norm(self.conv1),
             nn.ReLU()
         )
-        self.Conv_x = nn.Sequential(
-            nn.utils.parametrizations.spectral_norm(self.conv2),
-            nn.ReLU()
-        )
+        # self.Conv_x = nn.Sequential(
+        #     nn.utils.parametrizations.spectral_norm(self.conv2),
+        #     nn.ReLU()
+        # )
         self.blk1 = Res_Block_D(out_channel, out_channel)
         self.blk2 = Res_Block_D(out_channel, out_channel)
         self.blk3 = Res_Block_D(out_channel, out_channel)
         self.blk4 = Res_Block_D(out_channel, out_channel)
-        self.Relu = nn.ReLU()
+        # self.Relu = nn.ReLU()
 
     def forward(self, x):
         out = self.Conv(x)
