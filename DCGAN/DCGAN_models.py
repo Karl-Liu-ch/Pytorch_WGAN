@@ -71,7 +71,7 @@ class DCGAN():
                                                 transforms.Normalize(mean=[-0.286],
                                                                      std=[1.]),
                                                 ])
-        self.path += "_" + train_set + self.iter + '/'
+        self.path += "_" + train_set + '_' + self.iter + '/'
         self.optim_G = torch.optim.Adam(self.G.parameters(),lr=1e-4, betas=(0.5, 0.999))
         self.optim_D = torch.optim.Adam(self.D.parameters(),lr=1e-4, betas=(0.5, 0.999))
         self.checkpoint = 'checkpoint/'
