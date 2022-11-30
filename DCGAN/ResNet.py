@@ -46,7 +46,7 @@ class ResNet(nn.Module):
         out = self.Conv(x)
         x = self.Conv_x(x)
         out = self.blk4(self.blk3(self.blk2(self.blk1(out))))
-        return out + x
+        return out
 
 class Res_Block_D(nn.Module):
     def __init__(self, in_channel, out_channel):
@@ -99,4 +99,4 @@ class ResNet_D(nn.Module):
         out = self.Conv(x)
         x = self.Conv_x(x)
         out = self.blk4(self.blk3(self.blk2(self.blk1(out))))
-        return out + x
+        return out
