@@ -124,7 +124,7 @@ class WGAN():
         self.D.train()
         while self.epoch < self.maxepochs + 1:
             for x, _ in train_loader:
-                x = x.to(device)
+                x = Variable(x).to(device)
                 batch_size = x.size(0)
                 for p in self.D.parameters():
                     p.requires_grad = True
@@ -138,7 +138,7 @@ class WGAN():
                     D_real = self.D(x)
                     loss_real = -D_real.mean(0).view(1)
                     loss_real.backward()
-                    z = torch.randn((batch_size, 100, 1, 1)).to(device)
+                    z = Variable(torch.randn((batch_size, 100, 1, 1))).to(device)
                     x_fake = self.G(z).detach()
                     loss_fake = self.D(x_fake)
                     loss_fake = loss_fake.mean(0).view(1)
@@ -152,7 +152,7 @@ class WGAN():
                     self.Real_losses.append(loss_real.item())
                     self.Fake_losses.append(loss_fake.item())
 
-                z = torch.randn((batch_size, 100, 1, 1)).to(device)
+                z = Variable(torch.randn((batch_size, 100, 1, 1))).to(device)
                 self.G.zero_grad()
                 for p in self.D.parameters():
                     p.requires_grad = False
@@ -222,7 +222,7 @@ class WGAN():
 
     def evaluate(self):
         self.load()
-        z = torch.randn((1, 100, 1, 1)).to(device)
+        z = torch.randn((64, 100, 1, 1)).to(device)
         if self.spectral_norm:
             root = 'SN_WGAN'
         elif self.gradient_penalty:

@@ -2,6 +2,7 @@ import sys
 sys.path.append('../')
 from DCGAN.Generator import *
 from DCGAN.Discriminator import *
+from torch.autograd import Variable
 from Data_loader import train_loader_cifar, train_loader_mnist, train_loader_fashionmnist
 from DCGAN.get_fid_score import get_fid
 import os
@@ -90,7 +91,7 @@ class DCGAN():
             print('parameters initialization')
         while self.epoch < self.maxepochs + 1:
             for x, _ in train_loader:
-                x = x.to(device)
+                x = Variable(x).to(device)
                 batch_size = x.size(0)
                 true_label = torch.ones(batch_size, 1).to(device)
                 fake_label = torch.zeros(batch_size, 1).to(device)
@@ -99,7 +100,7 @@ class DCGAN():
                 D_real = self.D(x)
                 loss_real = self.loss_func(D_real, true_label)
                 loss_real.backward()
-                z = torch.randn((batch_size, 100, 1, 1)).to(device)
+                z = Variable(torch.randn((batch_size, 100, 1, 1))).to(device)
                 x_fake = self.G(z)
                 D_fake = self.D(x_fake.detach())
                 loss_fake = self.loss_func(D_fake, fake_label)
