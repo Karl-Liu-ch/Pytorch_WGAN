@@ -18,7 +18,8 @@ class Discriminator_Res(nn.Module):
             ResBlockDiscriminator(input_nums, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation=nn.ReLU(True)),
             ResBlockDiscriminator(64, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation=nn.ReLU(True)),
             ResBlockDiscriminator(256, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation=nn.ReLU(True)),
-            ResBlockDiscriminator(512, 1, kernel_size=(4, 4), stride=(2, 2), padding=(0, 0), activation=nn.Sigmoid())
+            nn.Conv2d(512, 1, kernel_size=(4, 4), stride=(1, 1), padding=0),
+            nn.Sigmoid()
         )
         print("Discriminator_Res")
 
