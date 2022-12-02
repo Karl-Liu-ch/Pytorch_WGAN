@@ -69,7 +69,7 @@ class Generator_Res(nn.Module):
             ResBlockGenerator(512, 256, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
             ResBlockGenerator(256, 64, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
             # ResBlockGenerator(64, num_output, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.Tanh()),
-            nn.Conv2d(64, num_output, kernel_size=(4,4), stride=(2,2), padding=(1,1)),
+            nn.ConvTranspose2d(64, num_output, kernel_size=(4,4), stride=(2,2), padding=(1,1)),
             nn.Tanh()
         )
         print("Generator_Res")
