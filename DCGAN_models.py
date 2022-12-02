@@ -208,19 +208,23 @@ class DCGAN():
             utils.save_image(grid, 'Results/'+path+'img_generatori_iter_{}.png'.format(self.epoch))
 
 if __name__ == '__main__':
-    # Train CIFAR on DCGAN 3 times.
-    for i in range(3):
-        _DCGAN = DCGAN(ResNet = False, train_set = "CIFAR", iter=i)
-        _DCGAN.train(train_loader_cifar)
-    # Train MNIST on DCGAN 3 times.
-    for i in range(3):
-        _DCGAN = DCGAN(ResNet=False, train_set="MNIST", iter=i)
-        _DCGAN.train(train_loader_mnist)
-    # Train FashionMNIST on DCGAN 3 times.
-    for i in range(3):
-        _DCGAN = DCGAN(ResNet=False, train_set="FashionMNIST", iter=i)
-        _DCGAN.train(train_loader_fashionmnist)
-    # Train CIFAR on ResNet_DCGAN 1 times.
-    for i in range(1):
-        _DCGAN = DCGAN(ResNet = True, train_set = "CIFAR", iter=i)
-        _DCGAN.train(train_loader_cifar)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-m', '--model', type=str, default="DCGAN")
+    parser.add_argument('-d', '--dataset', type=str, default="CIFAR", choices=['MNIST', 'CIFAR', 'FashionMNIST'])
+    parser.add_argument('-r', '--resnet', type=bool, default=False)
+    parser.add_argument('-i', '--iter', type=int, default=1)
+    parser.add_argument('-G', '--g_iter', type=int, default=int(1e5))
+    parser.add_argument('-D', '--d_iter', type=int, default=int(5))
+    args = parser.parse_args()
+    gradient_penalty = False
+    spectral_norm = False
+    if args.dataset == "CIFAR":
+        train_loader = train_loader_cifar
+    elif args.dataset == "MNIST":
+        train_loader = train_loader_mnist
+    else:
+        train_loader = train_loader_fashionmnist
+    for i in range(args.iter):
+        _DCGAN = DCGAN(ResNet=args.resnet, train_set=args.dataset, iter=i, G_iter=args.g_iter, D_iter=args.d_iter)
+        _DCGAN.train(train_loader)
