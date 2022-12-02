@@ -103,27 +103,19 @@ class DCGAN():
             batch_size = x.size(0)
             true_label = torch.ones(batch_size, 1).to(device)
             fake_label = torch.zeros(batch_size, 1).to(device)
-            for p in self.D.parameters():
-                p.requires_grad = True
-            for i in range(self.D_iter):
-                self.D.zero_grad()
-                D_real = self.D(x)
-                loss_real = self.loss_func(D_real, true_label)
-                loss_real.backward()
-                z = Variable(torch.randn((batch_size, 100, 1, 1))).to(device)
-                x_fake = self.G(z)
-                D_fake = self.D(x_fake.detach())
-                loss_fake = self.loss_func(D_fake, fake_label)
-                loss_fake.backward()
-                self.optim_D.step()
-                self.Real_losses.append(loss_real.item())
-                self.Fake_losses.append(loss_fake.item())
-                print("D_real_loss:{}, D_fake_loss:{}".format(loss_real.cpu().detach().numpy(),
-                                                                   loss_fake.cpu().detach().numpy()))
+            self.D.zero_grad()
             self.G.zero_grad()
-            for p in self.D.parameters():
-                p.requires_grad = False
+            D_real = self.D(x)
+            loss_real = self.loss_func(D_real, true_label)
+            loss_real.backward()
             z = Variable(torch.randn((batch_size, 100, 1, 1))).to(device)
+            x_fake = self.G(z)
+            D_fake = self.D(x_fake.detach())
+            loss_fake = self.loss_func(D_fake, fake_label)
+            loss_fake.backward()
+            self.optim_D.step()
+            self.Real_losses.append(loss_real.item())
+            self.Fake_losses.append(loss_fake.item())
             x_fake = self.G(z)
             loss_G = self.D(x_fake)
             loss_G = self.loss_func(loss_G, true_label)
@@ -131,6 +123,8 @@ class DCGAN():
             self.optim_G.step()
             self.G_losses.append(loss_G.item())
             print("epoch:{}, G_loss:{}".format(self.epoch, loss_G.cpu().detach().numpy()))
+            print("D_real_loss:{}, D_fake_loss:{}".format(loss_real.cpu().detach().numpy(),
+                                                                   loss_fake.cpu().detach().numpy()))
 
             if self.epoch % 1000 == 0:
                 self.save()
