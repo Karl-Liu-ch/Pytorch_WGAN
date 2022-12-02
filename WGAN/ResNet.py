@@ -19,7 +19,8 @@ class ResBlockGenerator(nn.Module):
             nn.BatchNorm2d(out_channel),
         )
         self.extra = nn.Sequential(
-            nn.Conv2d(in_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding),
+            nn.ConvTranspose2d(in_channel, out_channel, kernel_size=kernel_size,
+                               stride=stride, padding=padding),
             nn.BatchNorm2d(out_channel)
         )
         self.activation = activation
