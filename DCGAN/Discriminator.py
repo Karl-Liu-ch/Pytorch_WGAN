@@ -24,7 +24,9 @@ class Discriminator_Res(nn.Module):
 
     def forward(self, input):
         output = self.Net(input)
-        return output.view(output.size(0), -1)
+        output = torch.squeeze(output, dim=-1)
+        output = torch.squeeze(output, dim=-1)
+        return output
 
 class Discriminator_32(nn.Module):
     def __init__(self, input_nums):
