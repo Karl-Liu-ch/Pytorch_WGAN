@@ -103,6 +103,8 @@ class DCGAN():
             batch_size = x.size(0)
             true_label = torch.ones(batch_size, 1).to(device)
             fake_label = torch.zeros(batch_size, 1).to(device)
+            for p in self.D.parameters():
+                p.requires_grad = True
             for i in range(self.D_iter):
                 self.D.zero_grad()
                 D_real = self.D(x)
@@ -119,6 +121,8 @@ class DCGAN():
                 print("D_real_loss:{}, D_fake_loss:{}".format(loss_real.cpu().detach().numpy(),
                                                                    loss_fake.cpu().detach().numpy()))
             self.G.zero_grad()
+            for p in self.D.parameters():
+                p.requires_grad = False
             z = Variable(torch.randn((batch_size, 100, 1, 1))).to(device)
             x_fake = self.G(z)
             loss_G = self.D(x_fake)
