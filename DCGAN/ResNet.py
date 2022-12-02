@@ -2,6 +2,78 @@ import sys
 sys.path.append('../')
 import torch.nn as nn
 
+class ResBlockGenerator(nn.Module):
+    def __init__(self, in_channel, out_channel, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation = nn.ReLU(True)):
+        super().__init__()
+        self.Conv = nn.Sequential(
+            nn.ReflectionPad2d(1),
+            nn.Conv2d(in_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=0),
+            nn.BatchNorm2d(out_channel),
+            nn.ReLU(True),
+            nn.ConvTranspose2d(out_channel, out_channel, kernel_size=kernel_size,
+                               stride=stride, padding=padding),
+            nn.BatchNorm2d(out_channel),
+            nn.ReLU(True),
+            nn.ReflectionPad2d(1),
+            nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=0),
+            nn.BatchNorm2d(out_channel),
+        )
+        self.extra = nn.Sequential(
+            nn.Conv2d(in_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding),
+            nn.BatchNorm2d(out_channel)
+        )
+        self.activation = activation
+
+    def forward(self, x):
+        out = self.Conv(x)
+        x = self.extra(x)
+        return self.activation(out + x)
+
+class ResBlockDiscriminator(nn.Module):
+    def __init__(self, in_channel, out_channel, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), activation = nn.ReLU(True)):
+        super().__init__()
+        self.Conv = nn.Sequential(
+            nn.ReflectionPad2d(1),
+            nn.Conv2d(in_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=0),
+            nn.BatchNorm2d(out_channel),
+            nn.ReLU(True),
+            nn.Conv2d(out_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding),
+            nn.BatchNorm2d(out_channel),
+        )
+        self.extra = nn.Sequential(
+            nn.Conv2d(in_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding),
+            nn.BatchNorm2d(out_channel)
+        )
+        self.activation = activation
+
+    def forward(self, x):
+        out = self.Conv(x)
+        x = self.extra(x)
+        return self.activation(out + x)
+
+class SN_ResBlockDiscriminator(nn.Module):
+    def __init__(self, in_channel, out_channel, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), activation = nn.ReLU(True)):
+        super().__init__()
+        self.conv1 = nn.Conv2d(in_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=0)
+        self.conv2 = nn.Conv2d(out_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding)
+        self.conv3 = nn.Conv2d(in_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding)
+        nn.init.xavier_uniform_(self.conv1.weight.data, 1.)
+        nn.init.xavier_uniform_(self.conv2.weight.data, 1.)
+        nn.init.xavier_uniform_(self.conv3.weight.data, 1.)
+        self.Conv = nn.Sequential(
+            nn.ReflectionPad2d(1),
+            nn.utils.spectral_norm(self.conv1),
+            nn.ReLU(True),
+            nn.utils.spectral_norm(self.conv2),
+        )
+        self.extra = nn.utils.spectral_norm(self.conv3)
+        self.activation = activation
+
+    def forward(self, x):
+        out = self.Conv(x)
+        x = self.extra(x)
+        return self.activation(out + x)
+
 class Res_Block(nn.Module):
     def __init__(self, in_channel, out_channel):
         super(Res_Block, self).__init__()

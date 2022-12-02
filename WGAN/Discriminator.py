@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../')
 import torch.nn as nn
-from WGAN.ResNet import ResNet, ResNet_D
+from WGAN.ResNet import *
 
 class Discriminator_wgan_28(nn.Module):
     def __init__(self, input_nums):
@@ -61,12 +61,9 @@ class Discriminator_Res(nn.Module):
             return layer
 
         self.Net = nn.Sequential(
-            *Conv(input_nums, 64),
-            ResNet(64,64),
-            *Conv(64, 256),
-            ResNet(256, 256),
-            *Conv(256, 512),
-            ResNet(512, 512),
+            ResBlockDiscriminator(input_nums, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation=nn.ReLU(True)),
+            ResBlockDiscriminator(64, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation=nn.ReLU(True)),
+            ResBlockDiscriminator(256, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation=nn.ReLU(True)),
         )
         self.conv = nn.Conv2d(512, 1, kernel_size=(4, 4), stride=(1,1), padding=0)
         print("Discriminator_Res")
@@ -125,22 +122,13 @@ class Discriminator_SN_32(nn.Module):
 class Discriminator_SN_Res(nn.Module):
     def __init__(self, input_nums):
         super(Discriminator_SN_Res, self).__init__()
-        self.conv1 = nn.Conv2d(input_nums, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
-        self.conv2 = nn.Conv2d(64, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
-        self.conv3 = nn.Conv2d(256, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
-        nn.init.xavier_uniform_(self.conv1.weight.data, 1.)
-        nn.init.xavier_uniform_(self.conv2.weight.data, 1.)
-        nn.init.xavier_uniform_(self.conv3.weight.data, 1.)
         self.Net = nn.Sequential(
-            nn.utils.parametrizations.spectral_norm(self.conv1),
-            nn.ReLU(True),
-            ResNet_D(64,64),
-            nn.utils.parametrizations.spectral_norm(self.conv2),
-            nn.ReLU(True),
-            ResNet_D(256, 256),
-            nn.utils.parametrizations.spectral_norm(self.conv3),
-            nn.ReLU(True),
-            ResNet_D(512, 512)
+            SN_ResBlockDiscriminator(input_nums, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1),
+                                     activation=nn.ReLU(True)),
+            SN_ResBlockDiscriminator(64, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1),
+                                     activation=nn.ReLU(True)),
+            SN_ResBlockDiscriminator(256, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1),
+                                     activation=nn.ReLU(True)),
         )
         self.conv = nn.Conv2d(512, 1, kernel_size=(4, 4), stride=(1,1), padding=0)
         print("Discriminator_SN_Res")

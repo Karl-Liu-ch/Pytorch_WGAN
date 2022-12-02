@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../')
 import torch.nn as nn
-from WGAN.ResNet import ResNet
+from WGAN.ResNet import *
 
 class Generator_28(nn.Module):
     def __init__(self, num_input, num_output):
@@ -64,16 +64,11 @@ class Generator_Res(nn.Module):
             return layer
 
         self.Net = nn.Sequential(
-            *Conv(num_input, 1024),
-            ResNet(1024, 1024),
-            *Conv(1024, 512),
-            ResNet(512, 512),
-            *Conv(512, 256),
-            ResNet(256, 256),
-            *Conv(256, 64),
-            ResNet(64, 64),
-            nn.ConvTranspose2d(64, num_output, kernel_size=(4,4), stride=(2,2), padding=(1,1)),
-            nn.Tanh()
+            ResBlockGenerator(num_input, 1024, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
+            ResBlockGenerator(1024, 512, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
+            ResBlockGenerator(512, 256, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
+            ResBlockGenerator(256, 64, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
+            ResBlockGenerator(64, num_output, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.Tanh()),
         )
         print("Generator_Res")
 
