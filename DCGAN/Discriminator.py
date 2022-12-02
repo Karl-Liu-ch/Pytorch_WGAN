@@ -24,7 +24,7 @@ class Discriminator_Res(nn.Module):
 
     def forward(self, input):
         output = self.Net(input)
-        return output
+        return output.view(output.size(0), -1)
 
 class Discriminator_32(nn.Module):
     def __init__(self, input_nums):
