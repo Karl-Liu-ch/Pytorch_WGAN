@@ -6,12 +6,12 @@ class ResBlockGenerator(nn.Module):
     def __init__(self, in_channel, out_channel, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation = nn.ReLU(True)):
         super().__init__()
         self.Conv = nn.Sequential(
-            nn.ReflectionPad2d(1),
-            nn.Conv2d(in_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=0),
+            nn.ConvTranspose2d(in_channel, out_channel, kernel_size=kernel_size,
+                               stride=stride, padding=padding),
             nn.BatchNorm2d(out_channel),
             nn.ReLU(True),
-            nn.ConvTranspose2d(out_channel, out_channel, kernel_size=kernel_size,
-                               stride=stride, padding=padding),
+            nn.ReflectionPad2d(1),
+            nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=0),
             nn.BatchNorm2d(out_channel),
             nn.ReLU(True),
             nn.ReflectionPad2d(1),
