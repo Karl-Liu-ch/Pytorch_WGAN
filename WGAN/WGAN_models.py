@@ -31,7 +31,6 @@ class WGAN():
         self.train_set = train_set
         self.iter = str(int(iter))
         self.path = 'WGAN'
-        self.generator_iters = int(1e5)
         if train_set == 'CIFAR':
             self.invTrans = transforms.Compose([transforms.Normalize(mean=[0., 0., 0.],
                                                                      std=[1 / 0.247, 1 / 0.243, 1 / 0.261]),
@@ -123,11 +122,8 @@ class WGAN():
             pass
         self.G.train()
         self.D.train()
-        self.data = self.get_infinite_batches(train_loader)
         while self.epoch < self.maxepochs + 1:
             for x, _ in train_loader:
-                images = self.data.__next__()
-                images = Variable(images).to(device)
                 x = Variable(x).to(device)
                 batch_size = x.size(0)
                 for p in self.D.parameters():
@@ -181,11 +177,6 @@ class WGAN():
                     self.G_best = self.G
                 print("FID score: {}".format(fid_score))
             self.epoch += 1
-
-    def get_infinite_batches(self, data_loader):
-        while True:
-            for i, (images, _) in enumerate(data_loader):
-                yield images
 
     def save(self):
         torch.save({"epoch": self.epoch,
