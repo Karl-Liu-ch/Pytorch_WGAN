@@ -37,7 +37,7 @@ class ResBlockDiscriminator(nn.Module):
             nn.BatchNorm2d(out_channel),
             nn.ReLU(True),
             # ResNet(out_channel, out_channel),
-            nn.Conv2d(in_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1)),
+            nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1)),
             nn.BatchNorm2d(out_channel),
         )
         self.extra = nn.Sequential(
