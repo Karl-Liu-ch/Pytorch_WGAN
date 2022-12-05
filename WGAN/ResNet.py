@@ -10,12 +10,12 @@ class ResBlockGenerator(nn.Module):
                                stride=stride, padding=padding),
             nn.BatchNorm2d(out_channel),
             nn.ReLU(True),
-            # nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1)),
-            # nn.BatchNorm2d(out_channel),
-            # nn.ReLU(True),
-            # nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1)),
-            # nn.BatchNorm2d(out_channel),
-            ResNet(out_channel, out_channel)
+            nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1)),
+            nn.BatchNorm2d(out_channel),
+            nn.ReLU(True),
+            nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1)),
+            nn.BatchNorm2d(out_channel),
+            # ResNet(out_channel, out_channel)
         )
         self.extra = nn.Sequential(
             nn.ConvTranspose2d(in_channel, out_channel, kernel_size=kernel_size,
@@ -36,9 +36,9 @@ class ResBlockDiscriminator(nn.Module):
             nn.Conv2d(in_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding),
             nn.BatchNorm2d(out_channel),
             nn.ReLU(True),
-            ResNet(out_channel, out_channel),
-            # nn.Conv2d(in_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1)),
-            # nn.BatchNorm2d(out_channel),
+            # ResNet(out_channel, out_channel),
+            nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1)),
+            nn.BatchNorm2d(out_channel),
         )
         self.extra = nn.Sequential(
             nn.Conv2d(in_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding),
@@ -63,8 +63,8 @@ class SN_ResBlockDiscriminator(nn.Module):
         self.Conv = nn.Sequential(
             nn.utils.spectral_norm(self.conv1),
             nn.ReLU(True),
-            # nn.utils.spectral_norm(self.conv2),
-            ResNet_D(out_channel, out_channel)
+            nn.utils.spectral_norm(self.conv2),
+            # ResNet_D(out_channel, out_channel)
         )
         self.extra = nn.utils.spectral_norm(self.conv3)
         self.activation = activation
