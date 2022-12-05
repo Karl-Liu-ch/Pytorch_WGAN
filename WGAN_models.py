@@ -172,7 +172,8 @@ class WGAN():
 
             if self.epoch % 1000 == 0:
                 self.save()
-                self.evaluate()
+                if self.epoch % 5000 == 0:
+                    self.evaluate()
                 fid_score = get_fid(x, x_fake.detach())
                 self.fid_score.append(fid_score)
                 if fid_score < self.best_fid:
@@ -259,7 +260,43 @@ class WGAN():
             grid = utils.make_grid(fake_img)
             utils.save_image(grid, 'Results/' + path + 'img_generatori_iter_{}.png'.format(self.epoch))
 
-
+    def generate_samples(self):
+        if self.spectral_norm:
+            root = 'SN_WGAN'
+        elif self.gradient_penalty:
+            root = 'WGAN_GP'
+        else:
+            root = 'WGAN'
+        if self.ResNet:
+            root += "_Res"
+        if self.train_set == "CIFAR":
+            path = root + '_CIFAR'
+        elif self.train_set == "MNIST":
+            path = root + '_MNIST'
+        else:
+            path = root + '_FashionMNIST'
+        path += '_' + self.iter + '/'
+        try:
+            os.mkdir('Results/'+path)
+        except:
+            pass
+        self.load()
+        z = torch.randn((64, 100, 1, 1)).to(device)
+        with torch.no_grad():
+            fake_img = self.G(z)
+            fake_img_best = self.G_best(z)
+            fake_img = fake_img.data.cpu()
+            fake_img_best = fake_img_best.data.cpu()
+            if self.train_set == "CIFAR":
+                fake_img = self.invTrans(fake_img)
+                fake_img_best = self.invTrans(fake_img_best)
+            else:
+                fake_img = fake_img.mul(0.5).add(0.5)
+                fake_img_best = fake_img_best.mul(0.5).add(0.5)
+            grid = utils.make_grid(fake_img)
+            grid_best = utils.make_grid(fake_img_best)
+            utils.save_image(grid, 'Results/'+path+'img.png')
+            utils.save_image(grid_best, 'Results/'+path+'img_best.png')
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
