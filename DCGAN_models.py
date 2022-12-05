@@ -128,7 +128,8 @@ class DCGAN():
 
             if self.epoch % 1000 == 0:
                 self.save()
-                self.evaluate()
+                if self.epoch % 5000 == 0:
+                    self.evaluate()
                 fid_score = get_fid(x, x_fake.detach())
                 self.fid_score.append(fid_score)
                 if fid_score < self.best_fid:
