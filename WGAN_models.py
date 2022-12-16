@@ -11,6 +11,8 @@ from WGAN.Discriminator import Discriminator_Res, Discriminator_wgan_28, Discrim
     Discriminator_SN_28, Discriminator_SN_32, Discriminator_SN_Res
 from WGAN.get_fid_score import get_fid
 import torchvision.transforms as transforms
+import numpy as np
+import matplotlib.pyplot as plt
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -22,6 +24,7 @@ class WGAN():
         self.G_losses = []
         self.Real_losses = []
         self.Fake_losses = []
+        self.img_list = []
         self.weight_cliping_limit = 0.01
         self.D_iter = D_iter
         self.fid_score = []
@@ -34,11 +37,6 @@ class WGAN():
         self.path = 'WGAN'
         self.generator_iters = G_iter
         if train_set == 'CIFAR':
-            self.invTrans = transforms.Compose([transforms.Normalize(mean=[0., 0., 0.],
-                                                                     std=[1 / 0.247, 1 / 0.243, 1 / 0.261]),
-                                                transforms.Normalize(mean=[-0.4914, -0.4822, -0.4465],
-                                                                     std=[1., 1., 1.]),
-                                                ])
             self.img_size = 32
             self.output_ch = 3
         else:
@@ -72,18 +70,6 @@ class WGAN():
                     self.D = Discriminator_wgan_32(self.output_ch).to(device)
             if self.gradient_penalty:
                 self.path += '_GP'
-        if train_set == "MNIST":
-            self.invTrans = transforms.Compose([transforms.Normalize(mean=[0.],
-                                                                     std=[1 / 0.1306]),
-                                                transforms.Normalize(mean=[-0.4914],
-                                                                     std=[1.]),
-                                                ])
-        if train_set == "FashionMNIST":
-            self.invTrans = transforms.Compose([transforms.Normalize(mean=[0.],
-                                                                     std=[1 / 0.353]),
-                                                transforms.Normalize(mean=[-0.286],
-                                                                     std=[1.]),
-                                                ])
         self.path += '_' + train_set + '_' + self.iter + '/'
         self.checkpoint = 'checkpoint/'
         self.optim_G = torch.optim.RMSprop(self.G.parameters(), lr=5e-5)
@@ -231,7 +217,7 @@ class WGAN():
 
     def evaluate(self):
         self.load()
-        z = torch.randn((64, 100, 1, 1)).to(device)
+        z = torch.randn((800, 100, 1, 1)).to(device)
         if self.spectral_norm:
             root = 'SN_WGAN'
         elif self.gradient_penalty:
@@ -251,14 +237,16 @@ class WGAN():
         except:
             pass
         with torch.no_grad():
-            fake_img = self.G(z)
+            fake_img = self.G(z).detach()
             fake_img = fake_img.data.cpu()
-            if self.train_set == "CIFAR":
-                fake_img = self.invTrans(fake_img)
-            else:
-                fake_img = fake_img.mul(0.5).add(0.5)
-            grid = utils.make_grid(fake_img)
-            utils.save_image(grid, 'Results/' + path + 'img_generatori_iter_{}.png'.format(self.epoch))
+            # if self.train_set == "CIFAR":
+            #     fake_img = self.invTrans(fake_img)
+            # else:
+            #     fake_img = fake_img.mul(0.5).add(0.5)
+            grid = utils.make_grid(fake_img[:64], normalize=True)
+            self.img_list.append(grid)
+            torch.save({"img_list": self.img_list}, self.checkpoint + self.path + "img_list.pth".format(self.epoch))
+            # utils.save_image(grid, 'Results/' + path + 'img_generatori_iter_{}.png'.format(self.epoch))
 
     def generate_samples(self):
         if self.spectral_norm:
@@ -281,20 +269,21 @@ class WGAN():
         except:
             pass
         self.load()
-        z = torch.randn((64, 100, 1, 1)).to(device)
+        z = torch.randn((800, 100, 1, 1)).to(device)
         with torch.no_grad():
-            fake_img = self.G(z)
+            fake_img = self.G(z).detach()
             fake_img_best = self.G_best(z)
             fake_img = fake_img.data.cpu()
             fake_img_best = fake_img_best.data.cpu()
-            if self.train_set == "CIFAR":
-                fake_img = self.invTrans(fake_img)
-                fake_img_best = self.invTrans(fake_img_best)
-            else:
-                fake_img = fake_img.mul(0.5).add(0.5)
-                fake_img_best = fake_img_best.mul(0.5).add(0.5)
-            grid = utils.make_grid(fake_img)
-            grid_best = utils.make_grid(fake_img_best)
+            # if self.train_set == "CIFAR":
+            #     fake_img = self.invTrans(fake_img)
+            #     fake_img_best = self.invTrans(fake_img_best)
+            # else:
+            #     fake_img = fake_img.mul(0.5).add(0.5)
+            #     fake_img_best = fake_img_best.mul(0.5).add(0.5)
+            plt.show()
+            grid = utils.make_grid(fake_img[:64], normalize=True)
+            grid_best = utils.make_grid(fake_img_best[:64], normalize=True)
             utils.save_image(grid, 'Results/'+path+'img.png')
             utils.save_image(grid_best, 'Results/'+path+'img_best.png')
 if __name__ == '__main__':

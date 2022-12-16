@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../')
 import torch.nn as nn
-from DCGAN.ResNet import *
+from WGAN.ResNet import *
 
 class Generator_28(nn.Module):
     def __init__(self, num_input, num_output):
@@ -14,13 +14,12 @@ class Generator_28(nn.Module):
             return layer
 
         self.Net = nn.Sequential(
-            *Conv(num_input, 1024),
-            *Conv(1024, 512),
-            *Conv(512, 256),
-            nn.ConvTranspose2d(256, 64, kernel_size=(4, 4), stride=(2, 2), padding=(2, 2)),
-            nn.BatchNorm2d(64),
+            nn.ConvTranspose2d(num_input, 512, kernel_size=(4,4), stride=(1,1), padding=(0,0)),
+            nn.BatchNorm2d(512),
             nn.ReLU(True),
-            nn.ConvTranspose2d(64, num_output, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1)),
+            *Conv(512, 256), #256*8*8
+            *Conv(256, 64), #64*16 * 16
+            nn.ConvTranspose2d(64, 3, kernel_size=(4, 4), stride=(2, 2), padding=(2, 2)), #64*14*14
             nn.Tanh()
         )
         print("Generator_28")
@@ -40,8 +39,9 @@ class Generator_32(nn.Module):
             return layer
 
         self.Net = nn.Sequential(
-            *Conv(num_input, 1024),
-            *Conv(1024, 512),
+            nn.ConvTranspose2d(num_input, 512, kernel_size=(4, 4), stride=(1, 1), padding=(0, 0)),
+            nn.BatchNorm2d(512),
+            nn.ReLU(True),
             *Conv(512, 256),
             *Conv(256, 64),
             nn.ConvTranspose2d(64, num_output, kernel_size=(4,4), stride=(2,2), padding=(1,1)),
@@ -64,12 +64,16 @@ class Generator_32(nn.Module):
 #             return layer
 #
 #         self.Net = nn.Sequential(
-#             ResBlockGenerator(num_input, 1024, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
-#             ResBlockGenerator(1024, 512, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
+#             ResBlockGenerator(num_input, 512, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
+#             # 512 * 2 * 2
 #             ResBlockGenerator(512, 256, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
+#             # 256 * 4 * 4
 #             ResBlockGenerator(256, 64, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
-#             # ResBlockGenerator(64, num_output, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.Tanh()),
+#             # 64 * 8 * 8
+#             ResBlockGenerator(64, 64, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
+#             # 64 * 16 * 16
 #             nn.ConvTranspose2d(64, num_output, kernel_size=(4,4), stride=(2,2), padding=(1,1)),
+#             # 3 * 32 * 32
 #             nn.Tanh()
 #         )
 #         print("Generator_Res")
@@ -83,14 +87,13 @@ class Generator_Res(nn.Module):
         super(Generator_Res, self).__init__()
 
         self.Net = nn.Sequential(
-            ResBlockGenerator(num_input, 1024, kernel_size=(4,4), stride=(1,1), padding=(0,0), activation=nn.ReLU(True)),
-            # 1024 * 4 * 4
-            ResNet(1024, 1024),
-            ResBlockGenerator(1024, 512, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
-            # 256 * 8 * 8
+            ResBlockGenerator(num_input, 512, kernel_size=(4,4), stride=(1,1), padding=(0,0), activation=nn.ReLU(True)),
+            # 512 * 4 * 4
             ResBlockGenerator(512, 256, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
+            # 64 * 8 * 8
+            ResBlockGenerator(256, 64, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
             # 64 * 16 * 16
-            nn.ConvTranspose2d(256, num_output, kernel_size=(4,4), stride=(2,2), padding=(1,1)),
+            nn.ConvTranspose2d(64, num_output, kernel_size=(4,4), stride=(2,2), padding=(1,1)),
             # 3 * 32 * 32
             nn.Tanh()
         )
