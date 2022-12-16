@@ -19,7 +19,7 @@ class Generator_28(nn.Module):
             nn.ReLU(True),
             *Conv(512, 256), #256*8*8
             *Conv(256, 64), #64*16 * 16
-            nn.ConvTranspose2d(64, 3, kernel_size=(4, 4), stride=(2, 2), padding=(2, 2)), #64*14*14
+            nn.ConvTranspose2d(64, num_output, kernel_size=(4, 4), stride=(2, 2), padding=(2, 2)), #64*14*14
             nn.Tanh()
         )
         print("Generator_28")
