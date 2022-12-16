@@ -49,6 +49,9 @@ class WGAN():
             if spectral_norm:
                 self.path = 'SN_' + self.path
                 self.D = Discriminator_SN_Res(self.output_ch).to(device)
+            elif gradient_penalty:
+                self.path += "_GP"
+                self.D = Discriminator_Res(self.output_ch).to(device)
             else:
                 self.D = Discriminator_Res(self.output_ch).to(device)
         else:
@@ -282,9 +285,9 @@ class WGAN():
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model', type=str, default="WGAN_GP", choices=['WGAN', 'SN_WGAN', 'WGAN_GP'])
+    parser.add_argument('-m', '--model', type=str, default="SN_WGAN", choices=['WGAN', 'SN_WGAN', 'WGAN_GP'])
     parser.add_argument('-d', '--dataset', type=str, default="CIFAR", choices=['MNIST', 'CIFAR', 'FashionMNIST'])
-    parser.add_argument('-r', '--resnet', type=bool, default=False)
+    parser.add_argument('-r', '--resnet', type=bool, default=True)
     parser.add_argument('-i', '--iter', type=int, default=1)
     parser.add_argument('-G', '--g_iter', type=int, default=int(1e4))
     parser.add_argument('-D', '--d_iter', type=int, default=int(5))
