@@ -238,14 +238,8 @@ class WGAN():
         with torch.no_grad():
             fake_img = self.G(z).detach()
             fake_img = fake_img.data.cpu()
-            # if self.train_set == "CIFAR":
-            #     fake_img = self.invTrans(fake_img)
-            # else:
-            #     fake_img = fake_img.mul(0.5).add(0.5)
             grid = utils.make_grid(fake_img[:64], normalize=True)
-            self.img_list.append(grid)
-            torch.save({"img_list": self.img_list}, self.checkpoint + self.path + "img_list.pth".format(self.epoch))
-            # utils.save_image(grid, 'Results/' + path + 'img_generatori_iter_{}.png'.format(self.epoch))
+            utils.save_image(grid, 'Results/' + path + 'img_generatori_iter_{}.png'.format(self.epoch))
 
     def generate_samples(self):
         if self.spectral_norm:
@@ -288,7 +282,7 @@ class WGAN():
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model', type=str, default="WGAN", choices=['WGAN', 'SN_WGAN', 'WGAN_GP'])
+    parser.add_argument('-m', '--model', type=str, default="WGAN_GP", choices=['WGAN', 'SN_WGAN', 'WGAN_GP'])
     parser.add_argument('-d', '--dataset', type=str, default="CIFAR", choices=['MNIST', 'CIFAR', 'FashionMNIST'])
     parser.add_argument('-r', '--resnet', type=bool, default=False)
     parser.add_argument('-i', '--iter', type=int, default=1)
