@@ -26,7 +26,7 @@ def weights_init(m):
         nn.init.constant_(m.bias.data, 0)
 
 class DCGAN():
-    def __init__(self, ResNet = False, train_set = "CIFAR", iter = 0, G_iter = int(1e5), D_iter = int(5)):
+    def __init__(self, ResNet = False, train_set = "CIFAR", iter = 0, G_iter = int(1e4), D_iter = int(5)):
         self.ResNet = ResNet
         self.iter = str(int(iter))
         self.path = 'DCGAN'
@@ -126,10 +126,9 @@ class DCGAN():
             print("D_real_loss:{}, D_fake_loss:{}".format(loss_real.cpu().detach().numpy(),
                                                                    loss_fake.cpu().detach().numpy()))
 
-            if self.epoch % 1000 == 0:
+            if self.epoch % 500 == 0:
                 self.save()
-                if self.epoch % 5000 == 0:
-                    self.evaluate()
+                self.evaluate()
                 fid_score = get_fid(x, x_fake.detach())
                 self.fid_score.append(fid_score)
                 if fid_score < self.best_fid:
@@ -246,7 +245,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--dataset', type=str, default="CIFAR", choices=['MNIST', 'CIFAR', 'FashionMNIST'])
     parser.add_argument('-r', '--resnet', type=bool, default=False)
     parser.add_argument('-i', '--iter', type=int, default=1)
-    parser.add_argument('-G', '--g_iter', type=int, default=int(1e5))
+    parser.add_argument('-G', '--g_iter', type=int, default=int(1e4))
     parser.add_argument('-D', '--d_iter', type=int, default=int(5))
     args = parser.parse_args()
     gradient_penalty = False

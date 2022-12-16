@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 class WGAN():
-    def __init__(self, ResNet=False, gradient_penalty=False, spectral_norm=False, train_set='MNIST', iter=0, G_iter = int(1e5), D_iter = int(5)):
+    def __init__(self, ResNet=False, gradient_penalty=False, spectral_norm=False, train_set='MNIST', iter=0, G_iter = int(1e4), D_iter = int(5)):
         self.ResNet = ResNet
         self.epoch = 0
         self.maxepochs = int(1e3)
@@ -156,10 +156,9 @@ class WGAN():
             self.G_losses.append(loss_G.item())
             print("epoch:{}/{}, G_loss:{}".format(self.epoch, self.generator_iters, loss_G.cpu().detach().numpy()))
 
-            if self.epoch % 1000 == 0:
+            if self.epoch % 500 == 0:
                 self.save()
-                if self.epoch % 5000 == 0:
-                    self.evaluate()
+                self.evaluate()
                 fid_score = get_fid(x, x_fake.detach())
                 self.fid_score.append(fid_score)
                 if fid_score < self.best_fid:
@@ -293,7 +292,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--dataset', type=str, default="CIFAR", choices=['MNIST', 'CIFAR', 'FashionMNIST'])
     parser.add_argument('-r', '--resnet', type=bool, default=False)
     parser.add_argument('-i', '--iter', type=int, default=1)
-    parser.add_argument('-G', '--g_iter', type=int, default=int(1e5))
+    parser.add_argument('-G', '--g_iter', type=int, default=int(1e4))
     parser.add_argument('-D', '--d_iter', type=int, default=int(5))
     args = parser.parse_args()
     gradient_penalty = False
