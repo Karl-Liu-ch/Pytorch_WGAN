@@ -160,7 +160,7 @@ class WGAN():
                 loss_G.backward()
                 self.optim_G.step()
                 self.G_losses.append(loss_G.item())
-                print("iter: {}/{}, epoch:{}/{}, G_loss:{}".format(self.iter, len(train_loader), self.epoch, self.generator_iters, loss_G.cpu().detach().numpy()))
+                print("iter: {}/{}, epoch:{}/{}, G_loss:{}".format(self.iter, len(train_loader), self.epoch, self.maxepochs, loss_G.cpu().detach().numpy()))
 
                 if self.iter % 200 == 0:
                     self.save()
