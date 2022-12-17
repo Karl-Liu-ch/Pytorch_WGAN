@@ -11,21 +11,18 @@ import torchvision.transforms as transforms
 dataset_cifar = CIFAR10(root="Dataset/", download=True,
                            transform=transforms.Compose([
                                transforms.Resize(32),
-                               transforms.CenterCrop(32),
                                transforms.ToTensor(),
-                               transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261)),
+                               transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                            ]))
 dataset_mnist = MNIST(root="Dataset/", download=True,
                            transform=transforms.Compose([
                                transforms.Resize(28),
-                               transforms.CenterCrop(28),
                                transforms.ToTensor(),
                                transforms.Normalize((0.5,), (0.5,)),
                            ]))
 dataset_fashionmnist = FashionMNIST(root="Dataset/", download=True,
                            transform=transforms.Compose([
                                transforms.Resize(28),
-                               transforms.CenterCrop(28),
                                transforms.ToTensor(),
                                transforms.Normalize((0.5,), (0.5,)),
                            ]))
@@ -39,3 +36,6 @@ train_loader_mnist = torch.utils.data.DataLoader(dataset_mnist, batch_size=batch
                                          shuffle=True, num_workers= num_workers, pin_memory=True)
 train_loader_fashionmnist = torch.utils.data.DataLoader(dataset_fashionmnist, batch_size=batch_size,
                                          shuffle=True, num_workers= num_workers, pin_memory=True)
+
+if __name__ == "__main__":
+    print(dataset_cifar[0])
