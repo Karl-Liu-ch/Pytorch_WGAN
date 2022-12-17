@@ -136,7 +136,9 @@ class Discriminator_SN_Res(nn.Module):
     def __init__(self, input_nums):
         super(Discriminator_SN_Res, self).__init__()
         self.conv1 = nn.Conv2d(1024, 1, kernel_size=(4, 4), stride=(1,1), padding=0)
+        self.linear = nn.Linear(1024 * 4 * 4, 1)
         nn.init.xavier_uniform_(self.conv1.weight.data, 1.)
+        nn.init.xavier_uniform_(self.linear.weight.data, 1.)
         self.Net = nn.Sequential(
             SN_ResBlockDiscriminator(input_nums, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1),
                                      activation=nn.ReLU(True)),
@@ -147,7 +149,7 @@ class Discriminator_SN_Res(nn.Module):
         )
         # self.conv = nn.utils.spectral_norm(self.conv1)
         self.flatten = nn.Flatten()
-        self.dense = nn.utils.spectral_norm(nn.Linear(1024 * 4 * 4, 1))
+        self.dense = nn.utils.spectral_norm(self.linear)
         print("Discriminator_SN_Res")
 
     def forward(self, input):
