@@ -130,12 +130,12 @@ class WGAN():
                         for p in self.D.parameters():
                             p.data.clamp_(-self.weight_cliping_limit, self.weight_cliping_limit)
                 D_real = self.D(x)
-                loss_real = -D_real.mean(0).view(1)
+                loss_real = -D_real.mean()
                 loss_real.backward()
                 z = Variable(torch.randn((batch_size, 100, 1, 1))).to(device)
                 x_fake = self.G(z).detach()
                 loss_fake = self.D(x_fake)
-                loss_fake = loss_fake.mean(0).view(1)
+                loss_fake = loss_fake.mean()
                 loss_fake.backward()
                 if not self.spectral_norm:
                     if self.gradient_penalty:
@@ -154,7 +154,7 @@ class WGAN():
                 p.requires_grad = False
             x_fake = self.G(z)
             loss_G = self.D(x_fake)
-            loss_G = -loss_G.mean(0).view(1)
+            loss_G = -loss_G.mean()
             # train the generator
             loss_G.backward()
             self.optim_G.step()
@@ -241,10 +241,9 @@ class WGAN():
         except:
             pass
         with torch.no_grad():
-            fake_img = self.G(z).detach()
+            fake_img = self.G(z)
             fake_img = fake_img.mul(0.5).add(0.5)
             fake_img = fake_img.data.cpu()
-            # fake_img = fake_img.data.cpu()
             grid = utils.make_grid(fake_img[:64])
             utils.save_image(grid, 'Results/' + path + 'img_generatori_iter_{}.png'.format(self.epoch))
 
