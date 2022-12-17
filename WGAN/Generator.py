@@ -93,6 +93,7 @@ class Generator_Res(nn.Module):
             nn.ReLU(True)
         )
         self.Net = nn.Sequential(
+            ResNet(512, 512),
             # 512 * 4 * 4
             ResBlockGenerator(512, 256, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
             # 64 * 8 * 8
