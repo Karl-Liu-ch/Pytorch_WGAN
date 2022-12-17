@@ -58,13 +58,8 @@ class Generator_32(nn.Module):
 class Generator_Res(nn.Module):
     def __init__(self, num_input, num_output):
         super(Generator_Res, self).__init__()
-        self.dense = nn.Sequential(
-            nn.Linear(num_input, 1024 * 4 * 4),
-            nn.BatchNorm1d(1024 * 4 * 4),
-            nn.ReLU(True)
-        )
         self.Net = nn.Sequential(
-            ResNet(1024, 1024),
+            ResBlockGenerator(num_input, 1024, kernel_size=(4,4), stride=(1,1), padding=(0,0), activation=nn.ReLU(True)),
             # 1024 * 4 * 4
             ResBlockGenerator(1024, 512, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
             # 64 * 8 * 8
@@ -78,9 +73,5 @@ class Generator_Res(nn.Module):
         print("Generator_Res")
 
     def forward(self, input):
-        input = input.squeeze(-1)
-        input = input.squeeze(-1)
-        output = self.dense(input)
-        output = output.view(-1, 1024, 4, 4)
-        output = self.Net(output)
+        output = self.Net(input)
         return output
