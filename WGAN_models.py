@@ -116,14 +116,14 @@ class WGAN():
         self.G.train()
         self.D.train()
         self.data = self.get_infinite_batches(train_loader)
-        while self.epoch < self.maxepochs + 1:
+        while (self.epoch < self.maxepochs + 1) and (self.iter < self.generator_iters + 1):
             for i, data in enumerate(train_loader, 0):
                 x = Variable(data[0]).to(device)
                 batch_size = x.size(0)
                 for p in self.D.parameters():
                     p.requires_grad = True
                 for i in range(self.D_iter):
-                    # train the discreiminator
+                    # train the discriminator
                     self.D.zero_grad()
                     if not self.spectral_norm:
                         if not self.gradient_penalty:
@@ -172,8 +172,6 @@ class WGAN():
                     print("FID score: {}".format(fid_score))
                 self.iter += 1
             self.epoch += 1
-            if self.iter > self.generator_iters:
-                break
 
     def get_infinite_batches(self, data_loader):
         while True:
