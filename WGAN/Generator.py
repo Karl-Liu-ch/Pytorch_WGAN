@@ -8,20 +8,20 @@ class Generator_28(nn.Module):
         super(Generator_28, self).__init__()
         def Conv(input_nums, output_nums):
             layer = []
-            layer.append(nn.ConvTranspose2d(input_nums, output_nums, kernel_size=(4,4), stride=(2,2), padding=(1,1), bias=False))
+            layer.append(nn.ConvTranspose2d(input_nums, output_nums, kernel_size=(4,4), stride=(2,2), padding=(1,1)))
             layer.append(nn.BatchNorm2d(output_nums))
             layer.append(nn.ReLU(True))
             return layer
 
         self.Net = nn.Sequential(
-            nn.ConvTranspose2d(num_input, 1024, kernel_size=(4,4), stride=(1,1), padding=(0,0), bias=False),
+            nn.ConvTranspose2d(num_input, 1024, kernel_size=(4,4), stride=(1,1), padding=(0,0)),
             nn.BatchNorm2d(1024),
             nn.ReLU(True),
             *Conv(1024, 512),
-            nn.ConvTranspose2d(512, 256, kernel_size=(4, 4), stride=(2, 2), padding=(2, 2), bias=False),
+            nn.ConvTranspose2d(512, 256, kernel_size=(4, 4), stride=(2, 2), padding=(2, 2)),
             nn.BatchNorm2d(256),
             nn.ReLU(True),
-            nn.ConvTranspose2d(256, num_output, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), bias=False),
+            nn.ConvTranspose2d(256, num_output, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1)),
             nn.Tanh()
         )
         print("Generator_28")
@@ -35,18 +35,19 @@ class Generator_32(nn.Module):
         super(Generator_32, self).__init__()
         def Conv(input_nums, output_nums):
             layer = []
-            layer.append(nn.ConvTranspose2d(input_nums, output_nums, kernel_size=(4,4), stride=(2,2), padding=(1,1), bias=False))
+            layer.append(nn.ConvTranspose2d(input_nums, output_nums, kernel_size=(4,4), stride=(2,2), padding=(1,1)))
             layer.append(nn.BatchNorm2d(output_nums))
             layer.append(nn.ReLU(True))
             return layer
 
         self.Net = nn.Sequential(
-            nn.ConvTranspose2d(num_input, 1024, kernel_size=(4, 4), stride=(1, 1), padding=(0, 0), bias=False),
+            nn.ConvTranspose2d(num_input, 1024, kernel_size=(4, 4), stride=(1, 1), padding=(0, 0)),
             nn.BatchNorm2d(1024),
             nn.ReLU(True),
             *Conv(1024, 512),
             *Conv(512, 256),
-            nn.ConvTranspose2d(256, num_output, kernel_size=(4,4), stride=(2,2), padding=(1,1), bias=False),
+            *Conv(256, 64),
+            nn.ConvTranspose2d(64, num_output, kernel_size=(3,3), stride=(1,1), padding=(1,1)),
             nn.Tanh()
         )
         print("Generator_32")
@@ -67,7 +68,7 @@ class Generator_Res(nn.Module):
             # 64 * 16 * 16
             ResBlockGenerator(256, 64, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
             # 64 * 32 * 32
-            nn.Conv2d(64, num_output, kernel_size=(3,3),stride=(1,1),padding=(1,1)),
+            nn.ConvTranspose2d(64, num_output, kernel_size=(3,3),stride=(1,1),padding=(1,1)),
             nn.Tanh()
         )
         print("Generator_Res")
