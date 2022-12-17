@@ -210,11 +210,11 @@ class WGAN():
     def load(self):
         checkpoint_G = torch.load(self.checkpoint + self.path + "G.pth")
         checkpoint_D = torch.load(self.checkpoint + self.path + "D.pth")
-        self.epoch = checkpoint_G["epoch"]
-        self.iter = checkpoint_G["iter"]
         self.G.load_state_dict(checkpoint_G["G_state_dict"])
         self.G_best.load_state_dict(checkpoint_G["G_best_state_dict"])
         self.optim_G.load_state_dict(checkpoint_G["optimizer_G"])
+        self.epoch = checkpoint_G["epoch"]
+        self.iter = checkpoint_G["iter"]
         self.G_losses = checkpoint_G["losses_G"]
         self.fid_score = checkpoint_G["FID scores"]
         self.best_fid = checkpoint_G["Best FID score"]
