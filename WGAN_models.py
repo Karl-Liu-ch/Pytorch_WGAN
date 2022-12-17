@@ -118,7 +118,6 @@ class WGAN():
         self.data = self.get_infinite_batches(train_loader)
         while self.epoch < self.maxepochs + 1:
             for i, data in enumerate(train_loader, 0):
-                self.iter += 1
                 x = Variable(data[0]).to(device)
                 batch_size = x.size(0)
                 for p in self.D.parameters():
@@ -171,6 +170,7 @@ class WGAN():
                         self.best_fid = fid_score
                         self.G_best = self.G
                     print("FID score: {}".format(fid_score))
+                self.iter += 1
             self.epoch += 1
 
     def get_infinite_batches(self, data_loader):
