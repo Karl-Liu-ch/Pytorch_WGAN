@@ -147,7 +147,7 @@ class Discriminator_SN_Res(nn.Module):
         )
         # self.conv = nn.utils.spectral_norm(self.conv1)
         self.flatten = nn.Flatten()
-        self.dense = nn.utils.spectral_norm(nn.Linear(512 * 4 * 4, 1))
+        self.dense = nn.utils.spectral_norm(nn.Linear(1024 * 4 * 4, 1))
         print("Discriminator_SN_Res")
 
     def forward(self, input):
