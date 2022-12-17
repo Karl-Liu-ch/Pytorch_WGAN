@@ -246,7 +246,7 @@ class WGAN():
             pass
         with torch.no_grad():
             fake_img = self.G(z)
-            fake_img = fake_img.mul(0.5).add(0.5)
+            # fake_img = fake_img.mul(0.5).add(0.5)
             fake_img = fake_img.data.cpu()
             grid = utils.make_grid(fake_img[:64], normalize=True)
             utils.save_image(grid, 'Results/' + path + 'img_generatori_iter_{}.png'.format(self.iter))
