@@ -7,7 +7,7 @@ class ResBlockGenerator(nn.Module):
         super().__init__()
         self.Conv = nn.Sequential(
             nn.ConvTranspose2d(in_channel, out_channel, kernel_size=kernel_size,
-                               stride=stride, padding=padding),
+                               stride=stride, padding=padding, bias=False),
             nn.BatchNorm2d(out_channel),
             nn.ReLU(True),
             nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1)),
@@ -19,7 +19,7 @@ class ResBlockGenerator(nn.Module):
         )
         self.extra = nn.Sequential(
             nn.ConvTranspose2d(in_channel, out_channel, kernel_size=kernel_size,
-                               stride=stride, padding=padding),
+                               stride=stride, padding=padding, bias=False),
             nn.BatchNorm2d(out_channel)
         )
         self.activation = activation
