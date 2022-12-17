@@ -34,6 +34,7 @@ class WGAN():
         self.spectral_norm = spectral_norm
         self.train_set = train_set
         self.iter = 0
+        self.path_iters = iter
         self.path = 'WGAN'
         self.generator_iters = G_iter
         if train_set == 'CIFAR':
@@ -73,7 +74,7 @@ class WGAN():
                     self.D = Discriminator_wgan_32(self.output_ch).to(device)
             if self.gradient_penalty:
                 self.path += '_GP'
-        self.path += '_' + train_set + '_' + str(int(self.iter)) + '/'
+        self.path += '_' + train_set + '_' + str(int(self.path_iters)) + '/'
         self.checkpoint = 'checkpoint/'
         # self.optim_G = torch.optim.RMSprop(self.G.parameters(), lr=5e-5)
         # self.optim_D = torch.optim.RMSprop(self.D.parameters(), lr=5e-5)
@@ -266,7 +267,7 @@ class WGAN():
             path = root + '_MNIST'
         else:
             path = root + '_FashionMNIST'
-        path += '_' + str(int(self.iter)) + '/'
+        path += '_' + str(int(self.path_iters)) + '/'
         try:
             os.mkdir('Results/'+path)
         except:
