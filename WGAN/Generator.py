@@ -65,13 +65,14 @@ class Generator_Res(nn.Module):
         )
         self.Net = nn.Sequential(
             ResNet(1024, 1024),
-            # 512 * 4 * 4
+            # 1024 * 4 * 4
             ResBlockGenerator(1024, 512, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
             # 64 * 8 * 8
             ResBlockGenerator(512, 256, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
             # 64 * 16 * 16
-            nn.ConvTranspose2d(256, num_output, kernel_size=(4,4), stride=(2,2), padding=(1,1), bias=False),
-            # 3 * 32 * 32
+            ResBlockGenerator(256, 64, kernel_size=(4,4), stride=(2,2), padding=(1,1), activation=nn.ReLU(True)),
+            # 64 * 32 * 32
+            nn.Conv2d(64, num_output, kernel_size=(3,3),stride=(1,1),padding=(1,1)),
             nn.Tanh()
         )
         print("Generator_Res")

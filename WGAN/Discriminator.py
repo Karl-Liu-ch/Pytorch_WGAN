@@ -125,11 +125,11 @@ class Discriminator_SN_Res(nn.Module):
         self.conv1 = nn.Conv2d(1024, 1, kernel_size=(4, 4), stride=(1,1), padding=0)
         nn.init.xavier_uniform_(self.conv1.weight.data, 1.)
         self.Net = nn.Sequential(
-            SN_ResBlockDiscriminator(input_nums, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1),
+            SN_ResBlockDiscriminator(input_nums, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1),
+                                     activation=nn.ReLU(True)),
+            SN_ResBlockDiscriminator(256, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1),
                                      activation=nn.ReLU(True)),
             SN_ResBlockDiscriminator(512, 1024, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1),
-                                     activation=nn.ReLU(True)),
-            SN_ResBlockDiscriminator(1024, 1024, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1),
                                      activation=nn.ReLU(True)),
         )
         self.conv = nn.utils.spectral_norm(self.conv1)
