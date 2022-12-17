@@ -75,8 +75,10 @@ class WGAN():
                 self.path += '_GP'
         self.path += '_' + train_set + '_' + self.iter + '/'
         self.checkpoint = 'checkpoint/'
-        self.optim_G = torch.optim.RMSprop(self.G.parameters(), lr=5e-5)
-        self.optim_D = torch.optim.RMSprop(self.D.parameters(), lr=5e-5)
+        # self.optim_G = torch.optim.RMSprop(self.G.parameters(), lr=5e-5)
+        # self.optim_D = torch.optim.RMSprop(self.D.parameters(), lr=5e-5)
+        self.optim_G = torch.optim.Adam(self.G.parameters(), lr=1e-4, betas=(0.5, 0.999))
+        self.optim_D = torch.optim.Adam(self.D.parameters(), lr=1e-4, betas=(0.5, 0.999))
         print(self.D)
         print(self.G)
 
@@ -159,7 +161,7 @@ class WGAN():
             self.G_losses.append(loss_G.item())
             print("epoch:{}/{}, G_loss:{}".format(self.epoch, self.generator_iters, loss_G.cpu().detach().numpy()))
 
-            if self.epoch % 500 == 0:
+            if self.epoch % 1000 == 0:
                 self.save()
                 self.evaluate()
                 fid_score = get_fid(x, x_fake.detach())
