@@ -172,6 +172,8 @@ class WGAN():
                     print("FID score: {}".format(fid_score))
                 self.iter += 1
             self.epoch += 1
+            if self.iter > self.generator_iters:
+                break
 
     def get_infinite_batches(self, data_loader):
         while True:
@@ -296,7 +298,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--dataset', type=str, default="CIFAR", choices=['MNIST', 'CIFAR', 'FashionMNIST'])
     parser.add_argument('-r', '--resnet', type=bool, default=False)
     parser.add_argument('-i', '--iter', type=int, default=1)
-    parser.add_argument('-G', '--g_iter', type=int, default=int(1e5))
+    parser.add_argument('-G', '--g_iter', type=int, default=int(1e4))
     parser.add_argument('-D', '--d_iter', type=int, default=int(5))
     args = parser.parse_args()
     gradient_penalty = False
