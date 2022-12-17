@@ -249,7 +249,7 @@ class WGAN():
             fake_img = fake_img.mul(0.5).add(0.5)
             fake_img = fake_img.data.cpu()
             grid = utils.make_grid(fake_img[:64], normalize=True)
-            utils.save_image(grid, 'Results/' + path + 'img_generatori_iter_{}.png'.format(self.epoch))
+            utils.save_image(grid, 'Results/' + path + 'img_generatori_iter_{}.png'.format(self.iter))
 
     def generate_samples(self):
         if self.spectral_norm:
@@ -292,7 +292,7 @@ class WGAN():
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model', type=str, default="SN_WGAN", choices=['WGAN', 'SN_WGAN', 'WGAN_GP'])
+    parser.add_argument('-m', '--model', type=str, default="WGAN_GP", choices=['WGAN', 'SN_WGAN', 'WGAN_GP'])
     parser.add_argument('-d', '--dataset', type=str, default="CIFAR", choices=['MNIST', 'CIFAR', 'FashionMNIST'])
     parser.add_argument('-r', '--resnet', type=bool, default=False)
     parser.add_argument('-i', '--iter', type=int, default=1)
