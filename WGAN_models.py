@@ -33,7 +33,7 @@ class WGAN():
         self.gradient_penalty = gradient_penalty
         self.spectral_norm = spectral_norm
         self.train_set = train_set
-        self.iter = str(int(iter))
+        self.iter = 0
         self.path = 'WGAN'
         self.generator_iters = G_iter
         if train_set == 'CIFAR':
@@ -73,7 +73,7 @@ class WGAN():
                     self.D = Discriminator_wgan_32(self.output_ch).to(device)
             if self.gradient_penalty:
                 self.path += '_GP'
-        self.path += '_' + train_set + '_' + self.iter + '/'
+        self.path += '_' + train_set + '_' + str(int(self.iter)) + '/'
         self.checkpoint = 'checkpoint/'
         # self.optim_G = torch.optim.RMSprop(self.G.parameters(), lr=5e-5)
         # self.optim_D = torch.optim.RMSprop(self.D.parameters(), lr=5e-5)
@@ -116,60 +116,61 @@ class WGAN():
         self.G.train()
         self.D.train()
         self.data = self.get_infinite_batches(train_loader)
-        while self.epoch < self.generator_iters+1:
-            images = self.data.__next__()
-            x = Variable(images).to(device)
-            batch_size = x.size(0)
-            for p in self.D.parameters():
-                p.requires_grad = True
-            for i in range(self.D_iter):
-                # train the discreiminator
-                self.D.zero_grad()
-                if not self.spectral_norm:
-                    if not self.gradient_penalty:
-                        for p in self.D.parameters():
-                            p.data.clamp_(-self.weight_cliping_limit, self.weight_cliping_limit)
-                D_real = self.D(x)
-                loss_real = -D_real.mean()
-                loss_real.backward()
+        while self.epoch < self.maxepochs + 1:
+            for i, data in enumerate(train_loader, 0):
+                self.iter += 1
+                x = Variable(data[0]).to(device)
+                batch_size = x.size(0)
+                for p in self.D.parameters():
+                    p.requires_grad = True
+                for i in range(self.D_iter):
+                    # train the discreiminator
+                    self.D.zero_grad()
+                    if not self.spectral_norm:
+                        if not self.gradient_penalty:
+                            for p in self.D.parameters():
+                                p.data.clamp_(-self.weight_cliping_limit, self.weight_cliping_limit)
+                    D_real = self.D(x)
+                    loss_real = -D_real.mean()
+                    loss_real.backward()
+                    z = Variable(torch.randn((batch_size, 100, 1, 1))).to(device)
+                    x_fake = self.G(z).detach()
+                    loss_fake = self.D(x_fake)
+                    loss_fake = loss_fake.mean()
+                    loss_fake.backward()
+                    if not self.spectral_norm:
+                        if self.gradient_penalty:
+                            gp = self.calculate_gradient_penalty(x.data, x_fake.data)
+                            gp.backward()
+                    self.optim_D.step()
+                    loss_D = loss_fake + loss_real
+                    self.Real_losses.append(loss_real.item())
+                    self.Fake_losses.append(loss_fake.item())
+                    print("D_real_loss:{}, D_fake_loss:{}".format(loss_real.cpu().detach().numpy(),
+                                                              loss_fake.cpu().detach().numpy()))
+
                 z = Variable(torch.randn((batch_size, 100, 1, 1))).to(device)
-                x_fake = self.G(z).detach()
-                loss_fake = self.D(x_fake)
-                loss_fake = loss_fake.mean()
-                loss_fake.backward()
-                if not self.spectral_norm:
-                    if self.gradient_penalty:
-                        gp = self.calculate_gradient_penalty(x.data, x_fake.data)
-                        gp.backward()
-                self.optim_D.step()
-                loss_D = loss_fake + loss_real
-                self.Real_losses.append(loss_real.item())
-                self.Fake_losses.append(loss_fake.item())
-                print("D_real_loss:{}, D_fake_loss:{}".format(loss_real.cpu().detach().numpy(),
-                                                          loss_fake.cpu().detach().numpy()))
+                self.G.zero_grad()
+                for p in self.D.parameters():
+                    p.requires_grad = False
+                x_fake = self.G(z)
+                loss_G = self.D(x_fake)
+                loss_G = -loss_G.mean()
+                # train the generator
+                loss_G.backward()
+                self.optim_G.step()
+                self.G_losses.append(loss_G.item())
+                print("iter: {}/{}, epoch:{}/{}, G_loss:{}".format(self.iter, len(train_loader), self.epoch, self.generator_iters, loss_G.cpu().detach().numpy()))
 
-            z = Variable(torch.randn((batch_size, 100, 1, 1))).to(device)
-            self.G.zero_grad()
-            for p in self.D.parameters():
-                p.requires_grad = False
-            x_fake = self.G(z)
-            loss_G = self.D(x_fake)
-            loss_G = -loss_G.mean()
-            # train the generator
-            loss_G.backward()
-            self.optim_G.step()
-            self.G_losses.append(loss_G.item())
-            print("epoch:{}/{}, G_loss:{}".format(self.epoch, self.generator_iters, loss_G.cpu().detach().numpy()))
-
-            if self.epoch % 1000 == 0:
-                self.save()
-                self.evaluate()
-                fid_score = get_fid(x, x_fake.detach())
-                self.fid_score.append(fid_score)
-                if fid_score < self.best_fid:
-                    self.best_fid = fid_score
-                    self.G_best = self.G
-                print("FID score: {}".format(fid_score))
+                if self.iter % 200 == 0:
+                    self.save()
+                    self.evaluate()
+                    fid_score = get_fid(x, x_fake.detach())
+                    self.fid_score.append(fid_score)
+                    if fid_score < self.best_fid:
+                        self.best_fid = fid_score
+                        self.G_best = self.G
+                    print("FID score: {}".format(fid_score))
             self.epoch += 1
 
     def get_infinite_batches(self, data_loader):
@@ -179,6 +180,7 @@ class WGAN():
 
     def save(self):
         torch.save({"epoch": self.epoch,
+                    "iter": self.iter,
                     "G_state_dict": self.G.state_dict(),
                     "G_best_state_dict": self.G_best.state_dict(),
                     "optimizer_G": self.optim_G.state_dict(),
@@ -191,6 +193,7 @@ class WGAN():
                     "losses_real": self.Real_losses}, self.checkpoint + self.path + "D.pth")
         if self.epoch == self.generator_iters:
             torch.save({"epoch": self.epoch,
+                        "iter": self.iter,
                         "G_state_dict": self.G.state_dict(),
                         "G_best_state_dict": self.G_best.state_dict(),
                         "optimizer_G": self.optim_G.state_dict(),
@@ -207,6 +210,7 @@ class WGAN():
         checkpoint_G = torch.load(self.checkpoint + self.path + "G.pth")
         checkpoint_D = torch.load(self.checkpoint + self.path + "D.pth")
         self.epoch = checkpoint_G["epoch"]
+        self.iter = checkpoint_G["iter"]
         self.G.load_state_dict(checkpoint_G["G_state_dict"])
         self.G_best.load_state_dict(checkpoint_G["G_best_state_dict"])
         self.optim_G.load_state_dict(checkpoint_G["optimizer_G"])
@@ -244,7 +248,7 @@ class WGAN():
             fake_img = self.G(z)
             fake_img = fake_img.mul(0.5).add(0.5)
             fake_img = fake_img.data.cpu()
-            grid = utils.make_grid(fake_img[:64])
+            grid = utils.make_grid(fake_img[:64], normalize=True)
             utils.save_image(grid, 'Results/' + path + 'img_generatori_iter_{}.png'.format(self.epoch))
 
     def generate_samples(self):
@@ -262,7 +266,7 @@ class WGAN():
             path = root + '_MNIST'
         else:
             path = root + '_FashionMNIST'
-        path += '_' + self.iter + '/'
+        path += '_' + str(int(self.iter)) + '/'
         try:
             os.mkdir('Results/'+path)
         except:
@@ -289,7 +293,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--model', type=str, default="SN_WGAN", choices=['WGAN', 'SN_WGAN', 'WGAN_GP'])
-    parser.add_argument('-d', '--dataset', type=str, default="FashionMNIST", choices=['MNIST', 'CIFAR', 'FashionMNIST'])
+    parser.add_argument('-d', '--dataset', type=str, default="CIFAR", choices=['MNIST', 'CIFAR', 'FashionMNIST'])
     parser.add_argument('-r', '--resnet', type=bool, default=False)
     parser.add_argument('-i', '--iter', type=int, default=1)
     parser.add_argument('-G', '--g_iter', type=int, default=int(1e5))
