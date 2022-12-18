@@ -192,7 +192,7 @@ class WGAN():
                     "optimizer_D": self.optim_D.state_dict(),
                     "losses_fake": self.Fake_losses,
                     "losses_real": self.Real_losses}, self.checkpoint + self.path + "D.pth")
-        if self.epoch == self.generator_iters:
+        if (self.epoch == self.generator_iters) or (self.iter == self.generator_iters):
             torch.save({"epoch": self.epoch,
                         "iter": self.iter,
                         "G_state_dict": self.G.state_dict(),

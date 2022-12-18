@@ -123,7 +123,7 @@ class DCGAN():
                 loss_G.backward()
                 self.optim_G.step()
                 self.G_losses.append(loss_G.item())
-                print("epoch:{}, G_loss:{}".format(self.epoch, loss_G.cpu().detach().numpy()))
+                print("iter: {}/{}, epoch:{}/{}, G_loss:{}".format(self.iter, len(train_loader), self.epoch, self.maxepochs, loss_G.cpu().detach().numpy()))
                 print("D_real_loss:{}, D_fake_loss:{}".format(loss_real.cpu().detach().numpy(),
                                                                        loss_fake.cpu().detach().numpy()))
 
@@ -152,7 +152,7 @@ class DCGAN():
                     "optimizer_D": self.optim_D.state_dict(),
                     "losses_fake": self.Fake_losses,
                     "losses_real": self.Real_losses}, self.checkpoint + self.path + "D.pth")
-        if self.epoch == self.generator_iters:
+        if (self.epoch == self.generator_iters) or (self.iter == self.generator_iters):
             torch.save({"epoch": self.epoch,
                         "iter": self.iter,
                         "G_state_dict": self.G.state_dict(),
@@ -204,7 +204,7 @@ class DCGAN():
             fake_img = self.G(z)
             fake_img = fake_img.data.cpu()
             grid = utils.make_grid(fake_img[:64], normalize=True)
-            utils.save_image(grid, 'Results/'+path+'img_generatori_iter_{}.png'.format(self.epoch))
+            utils.save_image(grid, 'Results/'+path+'img_generatori_iter_{}.png'.format(self.iter))
 
     def generate_samples(self):
         root = 'DCGAN'
