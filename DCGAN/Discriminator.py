@@ -128,12 +128,15 @@ class Discriminator_SN_28(nn.Module):
             nn.utils.parametrizations.spectral_norm(nn.Conv2d(1024, 1024, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))),
             nn.ReLU(True),
             nn.utils.parametrizations.spectral_norm(self.conv),
+            nn.Sigmoid()
             # nn.Conv2d(1024, 1, kernel_size=(4, 4), stride=(1, 1), padding=(0, 0))
         )
         print("Discriminator_SN_28")
 
     def forward(self, input):
         output = self.Net(input)
+        output = torch.squeeze(output, dim=-1)
+        output = torch.squeeze(output, dim=-1)
         return output
 
 # class Discriminator_SN_32(nn.Module):
@@ -174,11 +177,14 @@ class Discriminator_SN_32(nn.Module):
             *Conv(input_nums, 256),
             *Conv(256, 512),
             *Conv(512, 1024),
+            nn.utils.parametrizations.spectral_norm(
+                nn.Conv2d(1024, 1, kernel_size=(4, 4), stride=(1, 1), padding=(0, 0))),
+            nn.Sigmoid()
         )
-        self.conv = nn.utils.parametrizations.spectral_norm(nn.Conv2d(1024, 1, kernel_size=(4, 4), stride=(1, 1), padding=(0, 0)))
         # self.conv =  nn.Conv2d(1024, 1, kernel_size=(4, 4), stride=(1,1), padding=0)
         print("Discriminator_SN_32")
     def forward(self, input):
         output = self.Net(input)
-        output = self.conv(output)
+        output = torch.squeeze(output, dim=-1)
+        output = torch.squeeze(output, dim=-1)
         return output
