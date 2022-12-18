@@ -71,8 +71,12 @@ class DCGAN():
                 self.G_best = Generator_28(100, self.output_ch).to(device)
                 self.D = Discriminator_28(self.output_ch).to(device)
         self.path += "_" + train_set + '_' + self.path_iter + '/'
-        self.optim_G = torch.optim.Adam(self.G.parameters(),lr=1e-4, betas=(0.5, 0.999))
-        self.optim_D = torch.optim.Adam(self.D.parameters(),lr=1e-4, betas=(0.5, 0.999))
+        if spectral_norm:
+            self.optim_G = torch.optim.RMSprop(self.G.parameters(), lr=5e-5)
+            self.optim_D = torch.optim.RMSprop(self.D.parameters(), lr=5e-5)
+        else:
+            self.optim_G = torch.optim.Adam(self.G.parameters(),lr=1e-4, betas=(0.5, 0.999))
+            self.optim_D = torch.optim.Adam(self.D.parameters(),lr=1e-4, betas=(0.5, 0.999))
         self.checkpoint = 'checkpoint/'
         print(self.D)
         print(self.G)
