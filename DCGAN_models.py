@@ -30,6 +30,7 @@ class DCGAN():
         self.ResNet = ResNet
         self.path_iter = str(int(iter))
         self.path = 'DCGAN'
+        self.spectral_normal = spectral_normal
         if spectral_normal:
             self.path = 'SN_' + self.path
         self.epoch = 0
@@ -183,6 +184,8 @@ class DCGAN():
         root = 'DCGAN'
         if self.ResNet:
             root += "_Res"
+        if self.spectral_normal:
+            root = "SN_" + root
         if self.train_set == "CIFAR":
             path = root + '_CIFAR/'
         elif self.train_set == "MNIST":
