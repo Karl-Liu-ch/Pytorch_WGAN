@@ -241,7 +241,7 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--resnet', type=bool, default=False)
     parser.add_argument('-i', '--iter', type=int, default=1)
     parser.add_argument('-G', '--g_iter', type=int, default=int(1e4))
-    parser.add_argument('-D', '--d_iter', type=int, default=int(5))
+    parser.add_argument('-D', '--d_iter', type=int, default=int(1))
     args = parser.parse_args()
     gradient_penalty = False
     spectral_norm = False
