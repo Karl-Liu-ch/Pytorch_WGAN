@@ -26,10 +26,12 @@ def weights_init(m):
         nn.init.constant_(m.bias.data, 0)
 
 class DCGAN():
-    def __init__(self, ResNet = False, train_set = "CIFAR", spectral_normal = False, iter = 0, G_iter = int(1e4), D_iter = int(5)):
+    def __init__(self, ResNet = False, train_set = "CIFAR", spectral_normal = False, iter = 0, G_iter = int(4e4), D_iter = int(5)):
         self.ResNet = ResNet
         self.path_iter = str(int(iter))
         self.path = 'DCGAN'
+        if spectral_normal:
+            self.path = 'SN_' + self.path
         self.epoch = 0
         self.maxepochs = int(1e3)
         self.loss_func = nn.BCELoss()
