@@ -107,8 +107,10 @@ class Discriminator_SN_32(nn.Module):
         def Conv(input_nums, output_nums):
             layer = []
             layer.append(nn.utils.spectral_norm(nn.Conv2d(input_nums, output_nums, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))))
+            layer.append(nn.BatchNorm2d(output_nums))
             layer.append(nn.ReLU())
             layer.append(nn.utils.spectral_norm(nn.Conv2d(output_nums, output_nums, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))))
+            layer.append(nn.BatchNorm2d(output_nums))
             layer.append(nn.ReLU())
             return layer
         self.Net = nn.Sequential(
