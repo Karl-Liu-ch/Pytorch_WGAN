@@ -16,17 +16,19 @@ class ResBlockGenerator(nn.Module):
         nn.init.xavier_uniform(self.deconv2.weight.data, 1.)
         self.Conv = nn.Sequential(
             nn.BatchNorm2d(in_channel),
-            nn.ReLU(True),
+            nn.ReLU(),
             self.deconv1,
             nn.BatchNorm2d(out_channel),
-            nn.ReLU(True),
+            nn.ReLU(),
             self.conv1,
             nn.BatchNorm2d(out_channel),
-            nn.ReLU(True),
+            nn.ReLU(),
             self.conv2,
         )
         self.extra = nn.Sequential(
-            self.deconv2
+            nn.BatchNorm2d(in_channel),
+            nn.ReLU(),
+            self.deconv1
         )
 
     def forward(self, x):
@@ -40,7 +42,7 @@ class ResBlockDiscriminator(nn.Module):
         self.Conv = nn.Sequential(
             nn.Conv2d(in_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding),
             nn.BatchNorm2d(out_channel),
-            nn.ReLU(True),
+            nn.ReLU(),
             # ResNet(out_channel, out_channel),
             nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1)),
             nn.BatchNorm2d(out_channel),
