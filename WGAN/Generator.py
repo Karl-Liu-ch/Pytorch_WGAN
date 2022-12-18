@@ -33,8 +33,6 @@ class Generator_28(nn.Module):
         output = self.Net(input)
         return output
 
-
-'''
 class Generator_32(nn.Module):
     def __init__(self, num_input, num_output):
         super(Generator_32, self).__init__()
@@ -42,13 +40,13 @@ class Generator_32(nn.Module):
             layer = []
             layer.append(nn.ConvTranspose2d(input_nums, output_nums, kernel_size=(4,4), stride=(2,2), padding=(1,1)))
             layer.append(nn.BatchNorm2d(output_nums))
-            layer.append(nn.ReLU(True))
+            layer.append(nn.ReLU())
             return layer
 
         self.Net = nn.Sequential(
             nn.ConvTranspose2d(num_input, 1024, kernel_size=(4, 4), stride=(1, 1), padding=(0, 0)),
             nn.BatchNorm2d(1024),
-            nn.ReLU(True),
+            nn.ReLU(),
             *Conv(1024, 512),
             *Conv(512, 256),
             *Conv(256, 64),
@@ -60,7 +58,6 @@ class Generator_32(nn.Module):
     def forward(self, input):
         output = self.Net(input)
         return output
-'''
 
 class Generator_Res(nn.Module):
     def __init__(self, num_input, num_output):
@@ -86,26 +83,3 @@ class Generator_Res(nn.Module):
         output = self.Net(input)
         return output
 
-class Generator_32(nn.Module):
-    def __init__(self, z_dim, num_output):
-        super(Generator_32, self).__init__()
-        self.z_dim = z_dim
-
-        self.model = nn.Sequential(
-            nn.ConvTranspose2d(z_dim, 1024, 4, stride=1),
-            nn.BatchNorm2d(1024),
-            nn.ReLU(),
-            nn.ConvTranspose2d(1024, 512, 4, stride=2, padding=(1, 1)),
-            nn.BatchNorm2d(512),
-            nn.ReLU(),
-            nn.ConvTranspose2d(512, 256, 4, stride=2, padding=(1, 1)),
-            nn.BatchNorm2d(256),
-            nn.ReLU(),
-            nn.ConvTranspose2d(256, 64, 4, stride=2, padding=(1, 1)),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.ConvTranspose2d(64, num_output, 3, stride=1, padding=(1, 1)),
-            nn.Tanh())
-
-    def forward(self, z):
-        return self.model(z)
