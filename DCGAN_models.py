@@ -229,7 +229,7 @@ class DCGAN():
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model', type=str, default="DCGAN")
+    parser.add_argument('-m', '--model', type=str, default="DCGAN", choices=['DCGAN', 'SN_DCGAN'])
     parser.add_argument('-d', '--dataset', type=str, default="CIFAR", choices=['MNIST', 'CIFAR', 'FashionMNIST'])
     parser.add_argument('-r', '--resnet', type=bool, default=False)
     parser.add_argument('-i', '--iter', type=int, default=1)
@@ -244,6 +244,8 @@ if __name__ == '__main__':
         train_loader = train_loader_mnist
     else:
         train_loader = train_loader_fashionmnist
+    if args.model == "SN_DCGAN":
+        spectral_norm = True
     for i in range(args.iter):
-        _DCGAN = DCGAN(ResNet=args.resnet, train_set=args.dataset, iter=i, G_iter=args.g_iter, D_iter=args.d_iter)
+        _DCGAN = DCGAN(ResNet=args.resnet, train_set=args.dataset, spectral_normal=spectral_norm, iter=i, G_iter=args.g_iter, D_iter=args.d_iter)
         _DCGAN.train(train_loader)
