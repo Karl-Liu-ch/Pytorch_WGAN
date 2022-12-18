@@ -6,11 +6,14 @@ class ResBlockGenerator(nn.Module):
     def __init__(self, in_channel, out_channel, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation = nn.ReLU(True)):
         super().__init__()
         self.deconv1 = nn.ConvTranspose2d(in_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
+        self.deconv2 = nn.ConvTranspose2d(in_channel, out_channel, kernel_size=kernel_size, stride=stride,
+                                          padding=padding, bias=False)
         self.conv1 = nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1))
         self.conv2 = nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1))
         nn.init.xavier_uniform(self.conv1.weight.data, 1.)
         nn.init.xavier_uniform(self.conv2.weight.data, 1.)
         nn.init.xavier_uniform(self.deconv1.weight.data, 1.)
+        nn.init.xavier_uniform(self.deconv2.weight.data, 1.)
         self.Conv = nn.Sequential(
             nn.BatchNorm2d(in_channel),
             nn.ReLU(True),
@@ -23,7 +26,7 @@ class ResBlockGenerator(nn.Module):
             self.conv2,
         )
         self.extra = nn.Sequential(
-            self.deconv1
+            self.deconv2
         )
 
     def forward(self, x):
