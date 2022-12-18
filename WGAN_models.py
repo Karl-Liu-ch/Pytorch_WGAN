@@ -144,7 +144,6 @@ class WGAN():
                             gp = self.calculate_gradient_penalty(x.data, x_fake.data)
                             gp.backward()
                     self.optim_D.step()
-                    loss_D = loss_fake + loss_real
                     self.Real_losses.append(loss_real.item())
                     self.Fake_losses.append(loss_fake.item())
                     print("D_real_loss:{}, D_fake_loss:{}".format(loss_real.cpu().detach().numpy(),
@@ -294,9 +293,9 @@ class WGAN():
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model', type=str, default="WGAN_GP", choices=['WGAN', 'SN_WGAN', 'WGAN_GP'])
+    parser.add_argument('-m', '--model', type=str, default="SN_WGAN", choices=['WGAN', 'SN_WGAN', 'WGAN_GP'])
     parser.add_argument('-d', '--dataset', type=str, default="CIFAR", choices=['MNIST', 'CIFAR', 'FashionMNIST'])
-    parser.add_argument('-r', '--resnet', type=bool, default=False)
+    parser.add_argument('-r', '--resnet', type=bool, default=True)
     parser.add_argument('-i', '--iter', type=int, default=1)
     parser.add_argument('-G', '--g_iter', type=int, default=int(1e4))
     parser.add_argument('-D', '--d_iter', type=int, default=int(1))

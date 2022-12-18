@@ -70,9 +70,9 @@ class SN_ResBlockDiscriminator(nn.Module):
         nn.init.xavier_uniform_(self.conv3.weight.data, 1.)
         nn.init.xavier_uniform_(self.conv4.weight.data, 1.)
         self.Conv = nn.Sequential(
-            nn.ReLU(True),
+            nn.ReLU(),
             nn.utils.spectral_norm(self.conv1),
-            nn.ReLU(True),
+            nn.ReLU(),
             nn.utils.spectral_norm(self.conv2),
         )
         self.extra = nn.Sequential(

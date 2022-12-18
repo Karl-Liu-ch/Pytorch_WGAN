@@ -67,13 +67,13 @@ class Generator_Res(nn.Module):
         super(Generator_Res, self).__init__()
         self.Net = nn.Sequential(
             ResBlockGenerator(num_input, 1024, kernel_size=(4, 4), stride=(1, 1), padding=(0, 0),
-                              activation=nn.ReLU(True)),
+                              activation=nn.ReLU()),
             # 1024 * 4 * 4
-            ResBlockGenerator(1024, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation=nn.ReLU(True)),
+            ResBlockGenerator(1024, 512, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation=nn.ReLU()),
             # 64 * 8 * 8
-            ResBlockGenerator(512, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation=nn.ReLU(True)),
+            ResBlockGenerator(512, 256, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation=nn.ReLU()),
             # 64 * 16 * 16
-            ResBlockGenerator(256, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation=nn.ReLU(True)),
+            ResBlockGenerator(256, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation=nn.ReLU()),
             # 64 * 32 * 32
             nn.BatchNorm2d(64),
             nn.ReLU(),
