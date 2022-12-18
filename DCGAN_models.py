@@ -98,7 +98,8 @@ class DCGAN():
             self.D.apply(weights_init)
             print('parameters initialization')
         self.data = self.get_infinite_batches(train_loader)
-        while (self.epoch < self.maxepochs + 1) and (self.iter < self.generator_iters + 1):
+        # while (self.epoch < self.maxepochs + 1) and (self.iter < self.generator_iters + 1):
+        while self.iter < self.generator_iters + 1:
             for i, data in enumerate(train_loader, 0):
                 x = Variable(data[0]).to(device)
                 batch_size = x.size(0)
@@ -123,7 +124,7 @@ class DCGAN():
                 loss_G.backward()
                 self.optim_G.step()
                 self.G_losses.append(loss_G.item())
-                print("iter: {}/{}, epoch:{}/{}, G_loss:{}".format(self.iter, len(train_loader), self.epoch, self.maxepochs, loss_G.cpu().detach().numpy()))
+                print("iter: {}/{}, epoch:{}/{}, G_loss:{}".format(self.iter, self.generator_iters, self.epoch, self.maxepochs, loss_G.cpu().detach().numpy()))
                 print("D_real_loss:{}, D_fake_loss:{}".format(loss_real.cpu().detach().numpy(),
                                                                        loss_fake.cpu().detach().numpy()))
 
