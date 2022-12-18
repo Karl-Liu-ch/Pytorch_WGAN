@@ -230,12 +230,11 @@ class WGAN():
     def evaluate(self):
         self.load()
         z = torch.randn((800, 100, 1, 1)).to(device)
+        root = 'WGAN'
         if self.spectral_norm:
-            root = 'SN_WGAN'
-        elif self.gradient_penalty:
-            root = 'WGAN_GP'
-        else:
-            root = 'WGAN'
+            root = 'SN_' + root
+        if self.gradient_penalty:
+            root += '_GP'
         if self.ResNet:
             root += "_Res"
         if self.train_set == "CIFAR":
@@ -256,12 +255,11 @@ class WGAN():
             utils.save_image(grid, 'Results/' + path + 'img_generatori_iter_{}.png'.format(self.iter))
 
     def generate_samples(self):
+        root = 'WGAN'
         if self.spectral_norm:
-            root = 'SN_WGAN'
-        elif self.gradient_penalty:
-            root = 'WGAN_GP'
-        else:
-            root = 'WGAN'
+            root = 'SN_' + root
+        if self.gradient_penalty:
+            root += '_GP'
         if self.ResNet:
             root += "_Res"
         if self.train_set == "CIFAR":
@@ -282,12 +280,6 @@ class WGAN():
             fake_img_best = self.G_best(z)
             fake_img = fake_img.data.cpu()
             fake_img_best = fake_img_best.data.cpu()
-            # if self.train_set == "CIFAR":
-            #     fake_img = self.invTrans(fake_img)
-            #     fake_img_best = self.invTrans(fake_img_best)
-            # else:
-            #     fake_img = fake_img.mul(0.5).add(0.5)
-            #     fake_img_best = fake_img_best.mul(0.5).add(0.5)
             plt.show()
             grid = utils.make_grid(fake_img[:64], normalize=True)
             grid_best = utils.make_grid(fake_img_best[:64], normalize=True)
