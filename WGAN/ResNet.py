@@ -5,29 +5,31 @@ import torch.nn as nn
 class ResBlockGenerator(nn.Module):
     def __init__(self, in_channel, out_channel, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation = nn.ReLU(True)):
         super().__init__()
+        self.deconv1 = nn.ConvTranspose2d(in_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
+        self.conv1 = nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1))
+        self.conv2 = nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1))
+        nn.init.xavier_uniform(self.conv1.weight.data, 1.)
+        nn.init.xavier_uniform(self.conv2.weight.data, 1.)
+        nn.init.xavier_uniform(self.deconv1.weight.data, 1.)
         self.Conv = nn.Sequential(
-            nn.ConvTranspose2d(in_channel, out_channel, kernel_size=kernel_size,
-                               stride=stride, padding=padding, bias=False),
+            nn.BatchNorm2d(in_channel),
+            nn.ReLU(True),
+            self.deconv1,
             nn.BatchNorm2d(out_channel),
             nn.ReLU(True),
-            nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1)),
+            self.conv1,
             nn.BatchNorm2d(out_channel),
             nn.ReLU(True),
-            nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1)),
-            nn.BatchNorm2d(out_channel),
-            # ResNet(out_channel, out_channel)
+            self.conv2,
         )
         self.extra = nn.Sequential(
-            nn.ConvTranspose2d(in_channel, out_channel, kernel_size=kernel_size,
-                               stride=stride, padding=padding, bias=False),
-            nn.BatchNorm2d(out_channel)
+            self.deconv1
         )
-        self.activation = activation
 
     def forward(self, x):
         out = self.Conv(x)
         x = self.extra(x)
-        return self.activation(out + x)
+        return out + x
 
 class ResBlockDiscriminator(nn.Module):
     def __init__(self, in_channel, out_channel, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), activation = nn.ReLU(True)):
@@ -56,23 +58,29 @@ class SN_ResBlockDiscriminator(nn.Module):
         super().__init__()
         self.conv1 = nn.Conv2d(in_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding)
         self.conv2 = nn.Conv2d(out_channel, out_channel, kernel_size=(3, 3), stride=(1, 1), padding=(1,1))
-        self.conv3 = nn.Conv2d(in_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding)
+        self.conv3 = nn.Conv2d(in_channel, out_channel, kernel_size=1, stride=1, padding=0)
+        self.conv4 = nn.Conv2d(out_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding)
         nn.init.xavier_uniform_(self.conv1.weight.data, 1.)
         nn.init.xavier_uniform_(self.conv2.weight.data, 1.)
         nn.init.xavier_uniform_(self.conv3.weight.data, 1.)
+        nn.init.xavier_uniform_(self.conv4.weight.data, 1.)
         self.Conv = nn.Sequential(
+            nn.ReLU(True),
             nn.utils.spectral_norm(self.conv1),
             nn.ReLU(True),
             nn.utils.spectral_norm(self.conv2),
-            # ResNet_D(out_channel, out_channel)
         )
-        self.extra = nn.utils.spectral_norm(self.conv3)
+        self.extra = nn.Sequential(
+            nn.utils.spectral_norm(self.conv3),
+            nn.ReLU(),
+            nn.utils.spectral_norm((self.conv4))
+        )
         self.activation = activation
 
     def forward(self, x):
         out = self.Conv(x)
         x = self.extra(x)
-        return self.activation(out + x)
+        return out + x
 
 class Res_Block(nn.Module):
     def __init__(self, in_channel, out_channel):

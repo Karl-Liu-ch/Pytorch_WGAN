@@ -62,7 +62,6 @@ class Generator_32(nn.Module):
         return output
 '''
 
-
 class Generator_Res(nn.Module):
     def __init__(self, num_input, num_output):
         super(Generator_Res, self).__init__()
@@ -76,6 +75,8 @@ class Generator_Res(nn.Module):
             # 64 * 16 * 16
             ResBlockGenerator(256, 64, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1), activation=nn.ReLU(True)),
             # 64 * 32 * 32
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
             nn.ConvTranspose2d(64, num_output, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
             nn.Tanh()
         )

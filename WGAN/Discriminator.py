@@ -136,6 +136,7 @@ class Discriminator_SN_Res(nn.Module):
                                      activation=nn.ReLU(True)),
             SN_ResBlockDiscriminator(512, 1024, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1),
                                      activation=nn.ReLU(True)),
+            nn.ReLU(),
         )
         self.conv = nn.utils.spectral_norm(self.conv1)
         print("Discriminator_SN_Res")
