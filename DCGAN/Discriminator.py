@@ -81,3 +81,104 @@ class Discriminator_28(nn.Module):
         output = torch.squeeze(output, dim=-1)
         output = torch.squeeze(output, dim=-1)
         return output
+
+
+class Discriminator_SN_28(nn.Module):
+    def __init__(self, input_nums):
+        super(Discriminator_SN_28, self).__init__()
+        def Conv(input_nums, output_nums):
+            layer = []
+            layer.append(nn.utils.parametrizations.spectral_norm(nn.Conv2d(input_nums, output_nums, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))))
+            layer.append(nn.ReLU(True))
+            return layer
+
+        self.Net = nn.Sequential(
+            *Conv(input_nums, 256),
+            *Conv(256, 512),
+            nn.utils.parametrizations.spectral_norm(nn.Conv2d(512, 1024, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))),
+            nn.ReLU(True),
+            nn.utils.parametrizations.spectral_norm(nn.Conv2d(1024, 1, kernel_size=(4, 4), stride=(1, 1), padding=(0, 0))),
+            nn.Sigmoid()
+        )
+        print("Discriminator_wgan_28")
+
+    def forward(self, input):
+        output = self.Net(input)
+        output = torch.squeeze(output, dim=-1)
+        output = torch.squeeze(output, dim=-1)
+        return output
+
+# class Discriminator_SN_28(nn.Module):
+#     def __init__(self, input_nums):
+#         super(Discriminator_SN_28, self).__init__()
+#         def Conv(input_nums, output_nums):
+#             layer = []
+#             layer.append(nn.utils.parametrizations.spectral_norm(nn.Conv2d(input_nums, output_nums, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))))
+#             layer.append(nn.ReLU(True))
+#             layer.append(nn.utils.parametrizations.spectral_norm(nn.Conv2d(output_nums, output_nums, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))))
+#             layer.append(nn.ReLU(True))
+#             return layer
+#         self.conv = nn.Conv2d(1024, 1, kernel_size=(4, 4), stride=(1, 1), padding=(0, 0))
+#
+#         self.Net = nn.Sequential(
+#             *Conv(input_nums, 256),
+#             *Conv(256, 512),
+#             nn.utils.parametrizations.spectral_norm(nn.Conv2d(512, 1024, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))),
+#             nn.ReLU(True),
+#             nn.utils.parametrizations.spectral_norm(nn.Conv2d(1024, 1024, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))),
+#             nn.ReLU(True),
+#             nn.utils.parametrizations.spectral_norm(self.conv),
+#             # nn.Conv2d(1024, 1, kernel_size=(4, 4), stride=(1, 1), padding=(0, 0))
+#         )
+#         print("Discriminator_SN_28")
+#
+#     def forward(self, input):
+#         output = self.Net(input)
+#         return output
+
+class Discriminator_SN_32(nn.Module):
+    def __init__(self, input_nums):
+        super(Discriminator_SN_32, self).__init__()
+        def Conv(input_nums, output_nums):
+            layer = []
+            layer.append(nn.utils.parametrizations.spectral_norm(nn.Conv2d(input_nums, output_nums, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))))
+            layer.append(nn.ReLU(True))
+            return layer
+
+        self.Net = nn.Sequential(
+            *Conv(input_nums, 256),
+            *Conv(256, 512),
+            *Conv(512, 1024),
+            nn.utils.parametrizations.spectral_norm(nn.Conv2d(1024, 1, kernel_size=(4, 4), stride=(1, 1), padding=0)),
+            nn.Sigmoid()
+        )
+        print("Discriminator_SN_32")
+
+    def forward(self, input):
+        output = self.Net(input)
+        output = torch.squeeze(output, dim=-1)
+        output = torch.squeeze(output, dim=-1)
+        return output
+
+# class Discriminator_SN_32(nn.Module):
+#     def __init__(self, input_nums):
+#         super(Discriminator_SN_32, self).__init__()
+#         def Conv(input_nums, output_nums):
+#             layer = []
+#             layer.append(nn.utils.parametrizations.spectral_norm(nn.Conv2d(input_nums, output_nums, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))))
+#             layer.append(nn.ReLU())
+#             layer.append(nn.utils.parametrizations.spectral_norm(nn.Conv2d(output_nums, output_nums, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))))
+#             layer.append(nn.ReLU())
+#             return layer
+#         self.Net = nn.Sequential(
+#             *Conv(input_nums, 256),
+#             *Conv(256, 512),
+#             *Conv(512, 1024),
+#         )
+#         self.conv = nn.utils.parametrizations.spectral_norm(nn.Conv2d(1024, 1, kernel_size=(4, 4), stride=(1, 1), padding=(0, 0)))
+#         # self.conv =  nn.Conv2d(1024, 1, kernel_size=(4, 4), stride=(1,1), padding=0)
+#         print("Discriminator_SN_32")
+#     def forward(self, input):
+#         output = self.Net(input)
+#         output = self.conv(output)
+#         return output

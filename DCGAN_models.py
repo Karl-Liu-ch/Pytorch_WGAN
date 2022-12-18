@@ -26,7 +26,7 @@ def weights_init(m):
         nn.init.constant_(m.bias.data, 0)
 
 class DCGAN():
-    def __init__(self, ResNet = False, train_set = "CIFAR", iter = 0, G_iter = int(1e4), D_iter = int(5)):
+    def __init__(self, ResNet = False, train_set = "CIFAR", spectral_normal = False, iter = 0, G_iter = int(1e4), D_iter = int(5)):
         self.ResNet = ResNet
         self.path_iter = str(int(iter))
         self.path = 'DCGAN'
@@ -43,38 +43,30 @@ class DCGAN():
         self.D_iter = D_iter
         self.iter = 0
         if train_set == "CIFAR":
-            self.invTrans = transforms.Compose([transforms.Normalize(mean=[0., 0., 0.],
-                                                                     std=[1 / 0.247, 1 / 0.243, 1 / 0.261]),
-                                                transforms.Normalize(mean=[-0.4914, -0.4822, -0.4465],
-                                                                     std=[1., 1., 1.]),
-                                                ])
             self.output_ch = 3
             if ResNet:
                 self.path += "_" + "Res"
                 self.G = Generator_Res(100, self.output_ch).to(device)
                 self.G_best = Generator_Res(100, 3).to(device)
                 self.D = Discriminator_Res(self.output_ch).to(device)
+            elif spectral_normal:
+                self.G = Generator_32(100, self.output_ch).to(device)
+                self.G_best = Generator_32(100, self.output_ch).to(device)
+                self.D = Discriminator_SN_32(self.output_ch).to(device)
             else:
                 self.G = Generator_32(100, self.output_ch).to(device)
                 self.G_best = Generator_32(100, self.output_ch).to(device)
                 self.D = Discriminator_32(self.output_ch).to(device)
         else:
             self.output_ch = 1
-            self.G = Generator_28(100, self.output_ch).to(device)
-            self.G_best = Generator_28(100, self.output_ch).to(device)
-            self.D = Discriminator_28(self.output_ch).to(device)
-        if train_set == "MNIST":
-            self.invTrans = transforms.Compose([transforms.Normalize(mean=[0.],
-                                                                     std=[1 / 0.1306]),
-                                                transforms.Normalize(mean=[-0.4914],
-                                                                     std=[1.]),
-                                                ])
-        if train_set == "FashionMNIST":
-            self.invTrans = transforms.Compose([transforms.Normalize(mean=[0.],
-                                                                     std=[1 / 0.353]),
-                                                transforms.Normalize(mean=[-0.286],
-                                                                     std=[1.]),
-                                                ])
+            if spectral_normal:
+                self.G = Generator_28(100, self.output_ch).to(device)
+                self.G_best = Generator_28(100, self.output_ch).to(device)
+                self.D = Discriminator_SN_28(self.output_ch).to(device)
+            else:
+                self.G = Generator_28(100, self.output_ch).to(device)
+                self.G_best = Generator_28(100, self.output_ch).to(device)
+                self.D = Discriminator_28(self.output_ch).to(device)
         self.path += "_" + train_set + '_' + self.path_iter + '/'
         self.optim_G = torch.optim.Adam(self.G.parameters(),lr=1e-4, betas=(0.5, 0.999))
         self.optim_D = torch.optim.Adam(self.D.parameters(),lr=1e-4, betas=(0.5, 0.999))
