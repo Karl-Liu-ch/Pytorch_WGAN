@@ -28,7 +28,7 @@ def weights_init(m):
 class DCGAN():
     def __init__(self, ResNet = False, train_set = "CIFAR", iter = 0, G_iter = int(1e4), D_iter = int(5)):
         self.ResNet = ResNet
-        self.iter = str(int(iter))
+        self.path_iter = str(int(iter))
         self.path = 'DCGAN'
         self.epoch = 0
         self.maxepochs = int(1e3)
@@ -41,6 +41,7 @@ class DCGAN():
         self.train_set = train_set
         self.generator_iters = G_iter
         self.D_iter = D_iter
+        self.iter = 0
         if train_set == "CIFAR":
             self.invTrans = transforms.Compose([transforms.Normalize(mean=[0., 0., 0.],
                                                                      std=[1 / 0.247, 1 / 0.243, 1 / 0.261]),
@@ -74,7 +75,7 @@ class DCGAN():
                                                 transforms.Normalize(mean=[-0.286],
                                                                      std=[1.]),
                                                 ])
-        self.path += "_" + train_set + '_' + self.iter + '/'
+        self.path += "_" + train_set + '_' + self.path_iter + '/'
         self.optim_G = torch.optim.Adam(self.G.parameters(),lr=1e-4, betas=(0.5, 0.999))
         self.optim_D = torch.optim.Adam(self.D.parameters(),lr=1e-4, betas=(0.5, 0.999))
         self.checkpoint = 'checkpoint/'
@@ -97,79 +98,83 @@ class DCGAN():
             self.D.apply(weights_init)
             print('parameters initialization')
         self.data = self.get_infinite_batches(train_loader)
-        while self.epoch < self.generator_iters + 1:
-            images = self.data.__next__()
-            x = Variable(images).to(device)
-            batch_size = x.size(0)
-            true_label = torch.ones(batch_size, 1).to(device)
-            fake_label = torch.zeros(batch_size, 1).to(device)
-            self.D.zero_grad()
-            self.G.zero_grad()
-            D_real = self.D(x)
-            loss_real = self.loss_func(D_real, true_label)
-            loss_real.backward()
-            z = Variable(torch.randn((batch_size, 100, 1, 1))).to(device)
-            x_fake = self.G(z)
-            D_fake = self.D(x_fake.detach())
-            loss_fake = self.loss_func(D_fake, fake_label)
-            loss_fake.backward()
-            self.optim_D.step()
-            self.Real_losses.append(loss_real.item())
-            self.Fake_losses.append(loss_fake.item())
-            x_fake = self.G(z)
-            loss_G = self.D(x_fake)
-            loss_G = self.loss_func(loss_G, true_label)
-            loss_G.backward()
-            self.optim_G.step()
-            self.G_losses.append(loss_G.item())
-            print("epoch:{}, G_loss:{}".format(self.epoch, loss_G.cpu().detach().numpy()))
-            print("D_real_loss:{}, D_fake_loss:{}".format(loss_real.cpu().detach().numpy(),
-                                                                   loss_fake.cpu().detach().numpy()))
+        while (self.epoch < self.maxepochs + 1) and (self.iter < self.generator_iters + 1):
+            for i, data in enumerate(train_loader, 0):
+                x = Variable(data[0]).to(device)
+                batch_size = x.size(0)
+                true_label = torch.ones(batch_size, 1).to(device)
+                fake_label = torch.zeros(batch_size, 1).to(device)
+                self.D.zero_grad()
+                self.G.zero_grad()
+                D_real = self.D(x)
+                loss_real = self.loss_func(D_real, true_label)
+                loss_real.backward()
+                z = Variable(torch.randn((batch_size, 100, 1, 1))).to(device)
+                x_fake = self.G(z)
+                D_fake = self.D(x_fake.detach())
+                loss_fake = self.loss_func(D_fake, fake_label)
+                loss_fake.backward()
+                self.optim_D.step()
+                self.Real_losses.append(loss_real.item())
+                self.Fake_losses.append(loss_fake.item())
+                x_fake = self.G(z)
+                loss_G = self.D(x_fake)
+                loss_G = self.loss_func(loss_G, true_label)
+                loss_G.backward()
+                self.optim_G.step()
+                self.G_losses.append(loss_G.item())
+                print("epoch:{}, G_loss:{}".format(self.epoch, loss_G.cpu().detach().numpy()))
+                print("D_real_loss:{}, D_fake_loss:{}".format(loss_real.cpu().detach().numpy(),
+                                                                       loss_fake.cpu().detach().numpy()))
 
-            if self.epoch % 500 == 0:
-                self.save()
-                self.evaluate()
-                fid_score = get_fid(x, x_fake.detach())
-                self.fid_score.append(fid_score)
-                if fid_score < self.best_fid:
-                    self.best_fid = fid_score
-                    self.G_best = self.G
-                print("FID score: {}".format(fid_score))
+                if self.iter % 200 == 0:
+                    self.save()
+                    self.evaluate()
+                    fid_score = get_fid(x, x_fake.detach())
+                    self.fid_score.append(fid_score)
+                    if fid_score < self.best_fid:
+                        self.best_fid = fid_score
+                        self.G_best = self.G
+                    print("FID score: {}".format(fid_score))
+                self.iter += 1
             self.epoch += 1
 
     def save(self):
         torch.save({"epoch": self.epoch,
+                    "iter": self.iter,
                     "G_state_dict": self.G.state_dict(),
                     "G_best_state_dict": self.G_best.state_dict(),
                     "optimizer_G": self.optim_G.state_dict(),
                     "losses_G": self.G_losses,
                     "FID scores": self.fid_score,
-                    "Best FID score": self.best_fid}, self.checkpoint+self.path+"G.pth")
+                    "Best FID score": self.best_fid}, self.checkpoint + self.path + "G.pth")
         torch.save({"D_state_dict": self.D.state_dict(),
                     "optimizer_D": self.optim_D.state_dict(),
                     "losses_fake": self.Fake_losses,
-                    "losses_real": self.Real_losses}, self.checkpoint+self.path+"D.pth")
+                    "losses_real": self.Real_losses}, self.checkpoint + self.path + "D.pth")
         if self.epoch == self.generator_iters:
             torch.save({"epoch": self.epoch,
+                        "iter": self.iter,
                         "G_state_dict": self.G.state_dict(),
                         "G_best_state_dict": self.G_best.state_dict(),
                         "optimizer_G": self.optim_G.state_dict(),
                         "losses_G": self.G_losses,
                         "FID scores": self.fid_score,
-                        "Best FID score": self.best_fid}, self.checkpoint+self.path+"G_{}.pth".format(self.epoch))
+                        "Best FID score": self.best_fid}, self.checkpoint + self.path + "G_{}.pth".format(self.epoch))
             torch.save({"D_state_dict": self.D.state_dict(),
                         "optimizer_D": self.optim_D.state_dict(),
                         "losses_fake": self.Fake_losses,
-                        "losses_real": self.Real_losses}, self.checkpoint+self.path+"D_{}.pth".format(self.epoch))
-        print("model saved! path: "+self.path)
+                        "losses_real": self.Real_losses}, self.checkpoint + self.path + "D_{}.pth".format(self.epoch))
+        print("model saved! path: " + self.path)
 
     def load(self):
-        checkpoint_G = torch.load(self.checkpoint+self.path+"G.pth")
-        checkpoint_D = torch.load(self.checkpoint+self.path+"D.pth")
-        self.epoch = checkpoint_G["epoch"]
+        checkpoint_G = torch.load(self.checkpoint + self.path + "G.pth")
+        checkpoint_D = torch.load(self.checkpoint + self.path + "D.pth")
         self.G.load_state_dict(checkpoint_G["G_state_dict"])
         self.G_best.load_state_dict(checkpoint_G["G_best_state_dict"])
         self.optim_G.load_state_dict(checkpoint_G["optimizer_G"])
+        self.epoch = checkpoint_G["epoch"]
+        self.iter = checkpoint_G["iter"]
         self.G_losses = checkpoint_G["losses_G"]
         self.fid_score = checkpoint_G["FID scores"]
         self.best_fid = checkpoint_G["Best FID score"]
@@ -177,7 +182,7 @@ class DCGAN():
         self.optim_D.load_state_dict(checkpoint_D["optimizer_D"])
         self.Fake_losses = checkpoint_D["losses_fake"]
         self.Real_losses = checkpoint_D["losses_real"]
-        print("model loaded! path: "+self.path)
+        print("model loaded! path: " + self.path)
 
     def evaluate(self):
         root = 'DCGAN'
@@ -211,7 +216,7 @@ class DCGAN():
             path = root + '_MNIST'
         else:
             path = root + '_FashionMNIST'
-        path += '_' + self.iter + '/'
+        path += '_' + str(int(self.iter)) + '/'
         try:
             os.mkdir('Results/'+path)
         except:
@@ -223,14 +228,8 @@ class DCGAN():
             fake_img_best = self.G_best(z)
             fake_img = fake_img.data.cpu()
             fake_img_best = fake_img_best.data.cpu()
-            if self.train_set == "CIFAR":
-                fake_img = self.invTrans(fake_img)
-                fake_img_best = self.invTrans(fake_img_best)
-            else:
-                fake_img = fake_img.mul(0.5).add(0.5)
-                fake_img_best = fake_img_best.mul(0.5).add(0.5)
-            grid = utils.make_grid(fake_img)
-            grid_best = utils.make_grid(fake_img_best)
+            grid = utils.make_grid(fake_img, normalize=True)
+            grid_best = utils.make_grid(fake_img_best, normalize=True)
             utils.save_image(grid, 'Results/'+path+'img.png')
             utils.save_image(grid_best, 'Results/'+path+'img_best.png')
 
