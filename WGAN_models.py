@@ -41,7 +41,8 @@ class WGAN():
             self.img_size = 32
             self.output_ch = 3
         else:
-            self.img_size = 28
+            # self.img_size = 28
+            self.img_size = 32
             self.output_ch = 1
         if ResNet:
             self.path += '_ResNet'

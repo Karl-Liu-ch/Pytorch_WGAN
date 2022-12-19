@@ -63,13 +63,19 @@ class DCGAN():
         else:
             self.output_ch = 1
             if spectral_normal:
-                self.G = Generator_28(100, self.output_ch).to(device)
-                self.G_best = Generator_28(100, self.output_ch).to(device)
-                self.D = Discriminator_SN_28(self.output_ch).to(device)
+                # self.G = Generator_28(100, self.output_ch).to(device)
+                # self.G_best = Generator_28(100, self.output_ch).to(device)
+                # self.D = Discriminator_SN_28(self.output_ch).to(device)
+                self.G = Generator_32(100, self.output_ch).to(device)
+                self.G_best = Generator_32(100, self.output_ch).to(device)
+                self.D = Discriminator_SN_32(self.output_ch).to(device)
             else:
-                self.G = Generator_28(100, self.output_ch).to(device)
-                self.G_best = Generator_28(100, self.output_ch).to(device)
-                self.D = Discriminator_28(self.output_ch).to(device)
+                # self.G = Generator_28(100, self.output_ch).to(device)
+                # self.G_best = Generator_28(100, self.output_ch).to(device)
+                # self.D = Discriminator_28(self.output_ch).to(device)
+                self.G = Generator_32(100, self.output_ch).to(device)
+                self.G_best = Generator_32(100, self.output_ch).to(device)
+                self.D = Discriminator_32(self.output_ch).to(device)
         self.path += "_" + train_set + '_' + self.path_iter + '/'
         if spectral_norm:
             self.optim_G = torch.optim.RMSprop(self.G.parameters(), lr=5e-5)
