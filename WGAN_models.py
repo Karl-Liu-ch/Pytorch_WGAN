@@ -37,6 +37,7 @@ class WGAN():
         self.path_iters = iter
         self.path = 'WGAN'
         self.generator_iters = G_iter
+        self.samples = []
         if train_set == 'CIFAR':
             self.img_size = 32
             self.output_ch = 3
