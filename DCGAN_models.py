@@ -45,6 +45,7 @@ class DCGAN():
         self.generator_iters = G_iter
         self.D_iter = D_iter
         self.iter = 0
+        self.samples = []
         if train_set == "CIFAR":
             self.output_ch = 3
             if ResNet:
@@ -134,8 +135,8 @@ class DCGAN():
                                                                        loss_fake.cpu().detach().numpy()))
 
                 if self.iter % 200 == 0:
+                    samples = self.evaluate()
                     self.save()
-                    self.evaluate()
                     fid_score = get_fid(x, x_fake.detach())
                     self.fid_score.append(fid_score)
                     if fid_score < self.best_fid:
@@ -155,7 +156,8 @@ class DCGAN():
                     "optimizer_G": self.optim_G.state_dict(),
                     "losses_G": self.G_losses,
                     "FID scores": self.fid_score,
-                    "Best FID score": self.best_fid}, self.checkpoint + self.path + "G.pth")
+                    "Best FID score": self.best_fid,
+                    "samples": self.samples}, self.checkpoint + self.path + "G.pth")
         torch.save({"D_state_dict": self.D.state_dict(),
                     "optimizer_D": self.optim_D.state_dict(),
                     "losses_fake": self.Fake_losses,
@@ -168,7 +170,8 @@ class DCGAN():
                         "optimizer_G": self.optim_G.state_dict(),
                         "losses_G": self.G_losses,
                         "FID scores": self.fid_score,
-                        "Best FID score": self.best_fid}, self.checkpoint + self.path + "G_{}.pth".format(self.epoch))
+                        "Best FID score": self.best_fid,
+                        "samples": self.samples}, self.checkpoint + self.path + "G_{}.pth".format(self.epoch))
             torch.save({"D_state_dict": self.D.state_dict(),
                         "optimizer_D": self.optim_D.state_dict(),
                         "losses_fake": self.Fake_losses,
@@ -186,6 +189,7 @@ class DCGAN():
         self.G_losses = checkpoint_G["losses_G"]
         self.fid_score = checkpoint_G["FID scores"]
         self.best_fid = checkpoint_G["Best FID score"]
+        self.samples = checkpoint_G["samples"]
         self.D.load_state_dict(checkpoint_D["D_state_dict"])
         self.optim_D.load_state_dict(checkpoint_D["optimizer_D"])
         self.Fake_losses = checkpoint_D["losses_fake"]
@@ -213,6 +217,7 @@ class DCGAN():
         with torch.no_grad():
             fake_img = self.G(z)
             fake_img = fake_img.data.cpu()
+            self.samples.append(fake_img[:64])
             grid = utils.make_grid(fake_img[:64], normalize=True)
             utils.save_image(grid, 'Results/'+path+'img_generatori_iter_{}.png'.format(self.iter))
 
