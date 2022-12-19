@@ -142,6 +142,8 @@ class DCGAN():
                         self.best_fid = fid_score
                         self.G_best = self.G
                     print("FID score: {}".format(fid_score))
+                if self.iter > self.generator_iters:
+                    break
                 self.iter += 1
             self.epoch += 1
 
