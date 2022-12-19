@@ -233,7 +233,7 @@ class WGAN():
         print("model loaded! path: " + self.path)
 
     def evaluate(self):
-        self.load()
+        # self.load()
         z = torch.randn((800, 100, 1, 1)).to(device)
         root = 'WGAN'
         if self.spectral_norm:

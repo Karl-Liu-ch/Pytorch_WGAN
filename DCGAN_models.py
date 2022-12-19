@@ -206,7 +206,7 @@ class DCGAN():
             os.mkdir('Results/'+path)
         except:
             pass
-        self.load()
+        # self.load()
         z = torch.randn((800, 100, 1, 1)).to(device)
         with torch.no_grad():
             fake_img = self.G(z)
