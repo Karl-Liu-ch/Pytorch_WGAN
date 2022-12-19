@@ -120,7 +120,7 @@ class WGAN():
         try:
             self.load()
         except:
-            pass
+            self.__init__(ResNet=self.ResNet, gradient_penalty=self.gradient_penalty, spectral_norm=self.spectral_norm, train_set=self.train_set, iter=self.path_iters, G_iter = self.generator_iters, D_iter = self.D_iter)
         self.G.train()
         self.D.train()
         self.data = self.get_infinite_batches(train_loader)

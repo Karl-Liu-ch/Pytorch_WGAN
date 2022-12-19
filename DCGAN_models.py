@@ -29,6 +29,7 @@ class DCGAN():
     def __init__(self, ResNet = False, train_set = "CIFAR", spectral_normal = False, iter = 0, G_iter = int(4e4), D_iter = int(5)):
         self.ResNet = ResNet
         self.path_iter = str(int(iter))
+        self.iters = iter
         self.path = 'DCGAN'
         self.spectral_normal = spectral_normal
         if spectral_normal:
@@ -101,6 +102,7 @@ class DCGAN():
         try:
             self.load()
         except:
+            self.__init__(ResNet = self.ResNet, train_set = self.train_set, spectral_normal = self.spectral_normal, iter = self.iters, G_iter = self.generator_iters, D_iter = self.D_iter)
             self.D.apply(weights_init)
             print('parameters initialization')
         self.data = self.get_infinite_batches(train_loader)
