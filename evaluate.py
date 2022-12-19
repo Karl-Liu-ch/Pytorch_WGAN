@@ -1,8 +1,8 @@
 import os
 import pandas as pd
 from Data_loader import *
-from WGAN.WGAN_models import WGAN
-from DCGAN.DCGAN_models import DCGAN
+from WGAN_models import WGAN
+from DCGAN_models import DCGAN
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sb
@@ -72,10 +72,10 @@ def get_fid_scores(model = 'DCGAN', dataset = 'CIFAR', ii = 20):
     np.save("Figure/" + model + "/" + dataset + "/Real_losses.npy", Real_losses)
     np.save("Figure/" + model + "/" + dataset + "/Fake_losses.npy", Fake_losses)
 
-def show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False, spectral_norm=False, train_set='FashionMNIST', iter=0):
+def show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False, spectral_norm=False, train_set='CIFAR', iter=0):
     j = 0
-    for i in range(20):
-        try:
+    for i in range(2):
+        # try:
             _DCGAN = DCGAN(ResNet=ResNet, train_set=train_set, iter=iter)
             _DCGAN.load()
             if i == 0:
@@ -83,11 +83,11 @@ def show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False, spectral
             else:
                 dcgan_fid += np.array(_DCGAN.fid_score)
             j += 1
-        except:
-            pass
+        # except:
+        #     pass
     dcgan_fid = dcgan_fid / j
     j = 0
-    for i in range(20):
+    for i in range(2):
         try:
             _WGAN = WGAN(ResNet=ResNet, gradient_penalty=gradient_penalty, spectral_norm=False, train_set=train_set,
                            iter=iter)
@@ -100,29 +100,29 @@ def show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False, spectral
         except:
             pass
     wgan_fid = wgan_fid / j
-    j = 0
-    for i in range(20):
-        try:
-            _SNWGAN = WGAN(ResNet=ResNet, gradient_penalty=gradient_penalty, spectral_norm=True, train_set=train_set, iter=iter)
-            _SNWGAN.load()
-            if i == 0:
-                snwgan_fid = np.array(_SNWGAN.fid_score)
-            else:
-                snwgan_fid += np.array(_SNWGAN.fid_score)
-            j += 1
-        except:
-            pass
-    snwgan_fid = snwgan_fid / j
-    epoch = _SNWGAN.epoch
-    x1 = np.linspace(0, epoch, len(_SNWGAN.fid_score))
-    # y1 = np.array(_SNWGAN.fid_score)
-    y1 = snwgan_fid
-    l1 = plt.plot(x1, y1, 'b--', label='SN WGAN')
-    x2 = np.linspace(0, epoch, len(_WGAN.fid_score))
+    # j = 0
+    # for i in range(20):
+    #     try:
+    #         _SNWGAN = WGAN(ResNet=ResNet, gradient_penalty=gradient_penalty, spectral_norm=True, train_set=train_set, iter=iter)
+    #         _SNWGAN.load()
+    #         if i == 0:
+    #             snwgan_fid = np.array(_SNWGAN.fid_score)
+    #         else:
+    #             snwgan_fid += np.array(_SNWGAN.fid_score)
+    #         j += 1
+    #     except:
+    #         pass
+    # snwgan_fid = snwgan_fid / j
+    iter = _WGAN.iter
+    # x1 = np.linspace(0, iter, len(_SNWGAN.fid_score))
+    # # y1 = np.array(_SNWGAN.fid_score)
+    # y1 = snwgan_fid
+    # l1 = plt.plot(x1, y1, 'b--', label='SN WGAN')
+    x2 = np.linspace(0, iter, len(_WGAN.fid_score))
     # y2 = np.array(_WGAN.fid_score)
     y2 = wgan_fid
     l2 = plt.plot(x2, y2, 'g--', label='WGAN')
-    x3 = np.linspace(0, epoch, len(_DCGAN.fid_score))
+    x3 = np.linspace(0, iter, len(_DCGAN.fid_score))
     # y3 = np.array(_DCGAN.fid_score)
     y3 = dcgan_fid
     l3 = plt.plot(x3, y3, 'r--', label='DCGAN')
@@ -217,12 +217,12 @@ def get_best_model(train_set='FashionMNIST', iters=20):
 if __name__ == '__main__':
     # fid_scores_mean = []
     # fid_scores_min = []
-    train_set = "FashionMNIST"
+    train_set = "CIFAR"
     # for i in range(10):
-    # show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False,
-    #                            spectral_norm=True, train_set=train_set, iter=1)
-    show_Losses(dcgan = False, ResNet=False, gradient_penalty=False,
-                               spectral_norm=True, train_set=train_set, iter=0)
+    show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False,
+                               spectral_norm=True, train_set=train_set, iter=1)
+    # show_Losses(dcgan = False, ResNet=False, gradient_penalty=False,
+    #                            spectral_norm=True, train_set=train_set, iter=0)
     #     # fid_scores_mean.append(fid_score_mean)
     #     # fid_scores_min.append(fid_score_min)
     # best_model, which_model, fid_dict = get_best_model(train_set=train_set)
