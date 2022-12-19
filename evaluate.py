@@ -76,7 +76,7 @@ def show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False, spectral
     j = 0
     for i in range(2):
         # try:
-            _DCGAN = DCGAN(ResNet=ResNet, train_set=train_set, iter=iter)
+            _DCGAN = DCGAN(ResNet=ResNet, train_set=train_set, spectral_normal=True, iter=i)
             _DCGAN.load()
             if i == 0:
                 dcgan_fid = np.array(_DCGAN.fid_score)
@@ -90,7 +90,7 @@ def show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False, spectral
     for i in range(2):
         try:
             _WGAN = WGAN(ResNet=ResNet, gradient_penalty=gradient_penalty, spectral_norm=False, train_set=train_set,
-                           iter=iter)
+                           iter=i)
             _WGAN.load()
             if i == 0:
                 wgan_fid = np.array(_WGAN.fid_score)
@@ -100,24 +100,25 @@ def show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False, spectral
         except:
             pass
     wgan_fid = wgan_fid / j
-    # j = 0
-    # for i in range(20):
-    #     try:
-    #         _SNWGAN = WGAN(ResNet=ResNet, gradient_penalty=gradient_penalty, spectral_norm=True, train_set=train_set, iter=iter)
-    #         _SNWGAN.load()
-    #         if i == 0:
-    #             snwgan_fid = np.array(_SNWGAN.fid_score)
-    #         else:
-    #             snwgan_fid += np.array(_SNWGAN.fid_score)
-    #         j += 1
-    #     except:
-    #         pass
-    # snwgan_fid = snwgan_fid / j
+    j = 0
+    for i in range(1):
+        # try:
+            _SNWGAN = WGAN(ResNet=ResNet, gradient_penalty=gradient_penalty, spectral_norm=True, train_set=train_set, iter=i)
+            _SNWGAN.load()
+            if i == 0:
+                snwgan_fid = np.array(_SNWGAN.fid_score)
+            else:
+                snwgan_fid += np.array(_SNWGAN.fid_score)
+            j += 1
+        # except:
+        #     pass
+    snwgan_fid = snwgan_fid / j
     iter = _WGAN.iter
-    # x1 = np.linspace(0, iter, len(_SNWGAN.fid_score))
-    # # y1 = np.array(_SNWGAN.fid_score)
-    # y1 = snwgan_fid
-    # l1 = plt.plot(x1, y1, 'b--', label='SN WGAN')
+    print(iter)
+    x1 = np.linspace(0, iter, len(_SNWGAN.fid_score))
+    # y1 = np.array(_SNWGAN.fid_score)
+    y1 = snwgan_fid
+    l1 = plt.plot(x1, y1, 'b--', label='SN WGAN')
     x2 = np.linspace(0, iter, len(_WGAN.fid_score))
     # y2 = np.array(_WGAN.fid_score)
     y2 = wgan_fid
