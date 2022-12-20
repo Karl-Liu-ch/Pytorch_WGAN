@@ -30,7 +30,7 @@ num_workers = 2
 # The loaders perform the actual work
 train_loader = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size,
                                          shuffle=True, num_workers= num_workers, pin_memory=True)
-test_loader = torch.utils.data.DataLoader(dataset_test, batch_size = 20000,
+test_loader = torch.utils.data.DataLoader(dataset_test, batch_size = 10000,
                                          shuffle=True, num_workers= num_workers, pin_memory=True)
 if __name__ == '__main__':
     real_batch = next(iter(train_loader))

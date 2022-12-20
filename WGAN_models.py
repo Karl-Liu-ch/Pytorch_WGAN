@@ -73,8 +73,6 @@ class WGAN():
                 self.G_best = Generator_32(100, self.output_ch).to(device)
                 if spectral_norm:
                     self.path = 'SN_' + self.path
-                    if gradient_penalty:
-                        self.path += '_GP'
                     self.D = Discriminator_SN_32(self.output_ch).to(device)
                 else:
                     self.D = Discriminator_wgan_32(self.output_ch).to(device)
