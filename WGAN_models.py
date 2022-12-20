@@ -252,7 +252,7 @@ class WGAN():
     def evaluate(self):
         z = torch.randn((64, 100, 1, 1)).to(device)
         try:
-            os.mkdir('Results/' + self.path)
+            os.mkdir(self.checkpoint + self.path + 'Results/')
         except:
             pass
         with torch.no_grad():
