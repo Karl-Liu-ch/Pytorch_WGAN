@@ -245,12 +245,12 @@ class DCGAN():
         except:
             pass
         # self.load()
-        z = torch.randn((800, 100, 1, 1)).to(device)
+        z = torch.randn((64, 100, 1, 1)).to(device)
         with torch.no_grad():
             fake_img = self.G(z)
             fake_img = fake_img.data.cpu()
-            self.samples.append(fake_img[:64])
             grid = utils.make_grid(fake_img[:64], normalize=True)
+            self.samples.append(grid)
             utils.save_image(grid, 'Results/'+path+'img_generatori_iter_{}.png'.format(self.iter))
 
     def generate_samples(self):
