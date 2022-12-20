@@ -46,7 +46,6 @@ class DCGAN():
         self.generator_iters = G_iter
         self.D_iter = D_iter
         self.iter = 0
-        self.samples = []
         if train_set == "CIFAR":
             self.output_ch = 3
             if ResNet:
@@ -158,8 +157,7 @@ class DCGAN():
                     "optimizer_G": self.optim_G.state_dict(),
                     "losses_G": self.G_losses,
                     "FID scores": self.fid_score,
-                    "Best FID score": self.best_fid,
-                    "samples": self.samples}, self.checkpoint + self.path + "G.pth")
+                    "Best FID score": self.best_fid}, self.checkpoint + self.path + "G.pth")
         torch.save({"D_state_dict": self.D.state_dict(),
                     "optimizer_D": self.optim_D.state_dict(),
                     "losses_fake": self.Fake_losses,
@@ -172,8 +170,7 @@ class DCGAN():
                         "optimizer_G": self.optim_G.state_dict(),
                         "losses_G": self.G_losses,
                         "FID scores": self.fid_score,
-                        "Best FID score": self.best_fid,
-                        "samples": self.samples}, self.checkpoint + self.path + "G_{}.pth".format(self.epoch))
+                        "Best FID score": self.best_fid}, self.checkpoint + self.path + "G_{}.pth".format(self.epoch))
             torch.save({"D_state_dict": self.D.state_dict(),
                         "optimizer_D": self.optim_D.state_dict(),
                         "losses_fake": self.Fake_losses,
@@ -191,7 +188,6 @@ class DCGAN():
         self.G_losses = checkpoint_G["losses_G"]
         self.fid_score = checkpoint_G["FID scores"]
         self.best_fid = checkpoint_G["Best FID score"]
-        self.samples = checkpoint_G["samples"]
         self.D.load_state_dict(checkpoint_D["D_state_dict"])
         self.optim_D.load_state_dict(checkpoint_D["optimizer_D"])
         self.Fake_losses = checkpoint_D["losses_fake"]
@@ -215,42 +211,16 @@ class DCGAN():
         Real_losses = checkpoint_D["losses_real"]
         return epoch, iter, G_losses, fid_score, best_fid, Fake_losses, Real_losses
 
-    def load_samples(self):
+    def evaluate(self):
+        z = torch.randn((64, 100, 1, 1)).to(device)
         try:
             os.mkdir('Results/' + self.path)
         except:
             pass
-        checkpoint_G = torch.load(self.checkpoint + self.path + "G.pth")
-        samples = checkpoint_G["samples"]
-        i = 0
-        for fake_img in samples:
-            grid = utils.make_grid(fake_img[:64], normalize=True)
-            utils.save_image(grid, 'Results/' + self.path + 'img_generatori_iter_{}.png'.format(int(i)))
-            i += 200
-
-    def evaluate(self):
-        root = 'DCGAN'
-        if self.ResNet:
-            root += "_Res"
-        if self.spectral_normal:
-            root = "SN_" + root
-        if self.train_set == "CIFAR":
-            path = root + '_CIFAR/'
-        elif self.train_set == "MNIST":
-            path = root + '_MNIST/'
-        else:
-            path = root + '_FashionMNIST/'
-        try:
-            os.mkdir('Results/'+path)
-        except:
-            pass
-        # self.load()
-        z = torch.randn((64, 100, 1, 1)).to(device)
         with torch.no_grad():
             fake_img = self.G(z).detach().cpu()
             grid = utils.make_grid(fake_img[:64], normalize=True)
-            self.samples.append(grid)
-            utils.save_image(grid, 'Results/'+path+'img_generatori_iter_{}.png'.format(self.iter))
+            utils.save_image(grid, self.checkpoint + self.path + 'Results/img_generatori_iter_{}.png'.format(self.iter))
 
     def generate_samples(self):
         root = 'DCGAN'
