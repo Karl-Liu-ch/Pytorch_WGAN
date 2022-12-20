@@ -1,11 +1,38 @@
 import os
 import pandas as pd
+import torch
 from Data_loader import *
 from WGAN_models import WGAN
 from DCGAN_models import DCGAN
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sb
+from Dataset.CIFAR_dataloader import test_loader as cifar_test_loader
+import torch
+from torchmetrics.image.fid import FrechetInceptionDistance
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+# fid = FrechetInceptionDistance().to(device)
+fid = FrechetInceptionDistance()
+def get_fid(real_images, fake_images):
+    '''
+        Takes real image batch and generated 'fake' image batch
+        Returns FID score, using the pytorch.metrics package
+    '''
+    # add 2 extra channels for MNIST (as required by InceptionV3
+    if real_images.shape[1] != 3:
+        real_images = torch.cat([real_images, real_images, real_images], 1)
+    if fake_images.shape[1] != 3:
+        fake_images = torch.cat([fake_images, fake_images, fake_images], 1)
+
+    # if images not uint8 format, convert them (required format by fid model)
+    if real_images.dtype != torch.uint8 or fake_images.dtype != torch.uint8:
+        real_images = real_images.type(torch.ByteTensor)
+        fake_images = fake_images.type(torch.ByteTensor)
+
+    fid.update(real_images, real=True)  # <--- currently running out of memory here
+    fid.update(fake_images, real=False)
+    return fid.compute().item()
+
 
 train_dataset = {
     "CIFAR":train_loader_cifar,
@@ -16,13 +43,13 @@ train_dataset = {
 def get_fid_score(dcgan = False, ResNet=False, gradient_penalty=False, spectral_norm=False, train_set='FashionMNIST', iter=0):
     if dcgan:
         GAN = DCGAN(ResNet=ResNet, train_set=train_set, iter=iter)
-        GAN.load()
+        epoch, iter, G_losses, fid_score, best_fid, Fake_losses, Real_losses = GAN.load_results()
     else:
         GAN = WGAN(ResNet=ResNet, gradient_penalty=gradient_penalty, spectral_norm=spectral_norm, train_set=train_set, iter=iter)
-        GAN.load()
-    print(GAN.epoch)
-    return np.array(GAN.fid_score).mean(), np.min(np.array(GAN.fid_score)), GAN.fid_score[-1], np.array(GAN.fid_score), \
-           np.array(GAN.G_losses), np.array(GAN.Real_losses), np.array(GAN.Fake_losses)
+        epoch, iter, G_losses, fid_score, best_fid, Fake_losses, Real_losses = GAN.load_results()
+    print(epoch)
+    return np.array(fid_score).mean(), np.min(np.array(fid_score)), fid_score[-1], np.array(fid_score), \
+           np.array(G_losses), np.array(Real_losses), np.array(Fake_losses)
 
 def get_fid_scores(model = 'DCGAN', dataset = 'CIFAR', ii = 20):
     fid_scores_mean = []
@@ -77,11 +104,11 @@ def show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False, spectral
     for i in range(2):
         # try:
             _DCGAN = DCGAN(ResNet=ResNet, train_set=train_set, spectral_normal=True, iter=i)
-            _DCGAN.load()
+            epoch, iter, G_losses, fid_score, best_fid, Fake_losses, Real_losses = _DCGAN.load_results()
             if i == 0:
-                dcgan_fid = np.array(_DCGAN.fid_score)
+                dcgan_fid = np.array(fid_score)
             else:
-                dcgan_fid += np.array(_DCGAN.fid_score)
+                dcgan_fid += np.array(fid_score)
             j += 1
         # except:
         #     pass
@@ -91,11 +118,11 @@ def show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False, spectral
         try:
             _WGAN = WGAN(ResNet=ResNet, gradient_penalty=gradient_penalty, spectral_norm=False, train_set=train_set,
                            iter=i)
-            _WGAN.load()
+            epoch, iter, G_losses, fid_score, best_fid, Fake_losses, Real_losses = _WGAN.load_results()
             if i == 0:
-                wgan_fid = np.array(_WGAN.fid_score)
+                wgan_fid = np.array(fid_score)
             else:
-                wgan_fid += np.array(_WGAN.fid_score)
+                wgan_fid += np.array(fid_score)
             j += 1
         except:
             pass
@@ -104,26 +131,25 @@ def show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False, spectral
     for i in range(1):
         # try:
             _SNWGAN = WGAN(ResNet=ResNet, gradient_penalty=gradient_penalty, spectral_norm=True, train_set=train_set, iter=i)
-            _SNWGAN.load()
+            epoch, iter, G_losses, fid_score, best_fid, Fake_losses, Real_losses = _SNWGAN.load_results()
             if i == 0:
-                snwgan_fid = np.array(_SNWGAN.fid_score)
+                snwgan_fid = np.array(fid_score)
             else:
-                snwgan_fid += np.array(_SNWGAN.fid_score)
+                snwgan_fid += np.array(fid_score)
             j += 1
         # except:
         #     pass
     snwgan_fid = snwgan_fid / j
-    iter = _WGAN.iter
     print(iter)
-    x1 = np.linspace(0, iter, len(_SNWGAN.fid_score))
+    x1 = np.linspace(0, iter, len(fid_score))
     # y1 = np.array(_SNWGAN.fid_score)
     y1 = snwgan_fid
     l1 = plt.plot(x1, y1, 'b--', label='SN WGAN')
-    x2 = np.linspace(0, iter, len(_WGAN.fid_score))
+    x2 = np.linspace(0, iter, len(fid_score))
     # y2 = np.array(_WGAN.fid_score)
     y2 = wgan_fid
     l2 = plt.plot(x2, y2, 'g--', label='WGAN')
-    x3 = np.linspace(0, iter, len(_DCGAN.fid_score))
+    x3 = np.linspace(0, iter, len(fid_score))
     # y3 = np.array(_DCGAN.fid_score)
     y3 = dcgan_fid
     l3 = plt.plot(x3, y3, 'r--', label='DCGAN')
@@ -220,8 +246,19 @@ if __name__ == '__main__':
     # fid_scores_min = []
     train_set = "CIFAR"
     # for i in range(10):
-    show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False,
-                               spectral_norm=True, train_set=train_set, iter=1)
+    # show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False,
+    #                            spectral_norm=True, train_set=train_set, iter=1)
+
+    _DCGAN = DCGAN(ResNet=False, train_set=train_set, spectral_normal=True, iter=0)
+    _DCGAN.load_generator()
+    for i, data in enumerate(cifar_test_loader):
+        with torch.no_grad():
+            x = data[0].to(device)
+            batch_size = x.size(0)
+            z = torch.randn((batch_size, 100, 1, 1)).to(device)
+            x_fake = _DCGAN.G(z)
+            fid_score = get_fid(x.cpu(), x_fake.cpu())
+            print(fid_score)
     # show_Losses(dcgan = False, ResNet=False, gradient_penalty=False,
     #                            spectral_norm=True, train_set=train_set, iter=0)
     #     # fid_scores_mean.append(fid_score_mean)

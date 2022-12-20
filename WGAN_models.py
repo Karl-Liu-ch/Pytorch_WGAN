@@ -238,6 +238,36 @@ class WGAN():
         self.Real_losses = checkpoint_D["losses_real"]
         print("model loaded! path: " + self.path)
 
+    def load_generator(self):
+        checkpoint_G = torch.load(self.checkpoint + self.path + "G.pth")
+        self.G.load_state_dict(checkpoint_G["G_state_dict"])
+        self.G_best.load_state_dict(checkpoint_G["G_best_state_dict"])
+
+    def load_results(self):
+        checkpoint_G = torch.load(self.checkpoint + self.path + "G.pth")
+        checkpoint_D = torch.load(self.checkpoint + self.path + "D.pth")
+        epoch = checkpoint_G["epoch"]
+        iter = checkpoint_G["iter"]
+        G_losses = checkpoint_G["losses_G"]
+        fid_score = checkpoint_G["FID scores"]
+        best_fid = checkpoint_G["Best FID score"]
+        Fake_losses = checkpoint_D["losses_fake"]
+        Real_losses = checkpoint_D["losses_real"]
+        return epoch, iter, G_losses, fid_score, best_fid, Fake_losses, Real_losses
+
+    def load_samples(self):
+        try:
+            os.mkdir('Results/' + self.path)
+        except:
+            pass
+        checkpoint_G = torch.load(self.checkpoint + self.path + "G.pth")
+        samples = checkpoint_G["samples"]
+        i = 0
+        for fake_img in samples:
+            grid = utils.make_grid(fake_img[:64], normalize=True)
+            utils.save_image(grid, 'Results/' + self.path + 'img_generatori_iter_{}.png'.format(int(i)))
+            i += 200
+
     def evaluate(self):
         # self.load()
         z = torch.randn((800, 100, 1, 1)).to(device)
