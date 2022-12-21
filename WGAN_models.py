@@ -321,7 +321,11 @@ if __name__ == '__main__':
     else:
         gradient_penalty = True
         spectral_norm = True
-    for i in range(args.iter):
-        _WGAN = WGAN(ResNet=args.resnet, gradient_penalty=gradient_penalty, spectral_norm=spectral_norm, train_set=args.dataset, iter=i,
-                     G_iter=args.g_iter, D_iter=args.d_iter)
-        _WGAN.train(train_loader)
+    # for i in range(args.iter):
+    #     _WGAN = WGAN(ResNet=args.resnet, gradient_penalty=gradient_penalty, spectral_norm=spectral_norm, train_set=args.dataset, iter=i,
+    #                  G_iter=args.g_iter, D_iter=args.d_iter)
+    #     _WGAN.train(train_loader)
+    _WGAN = WGAN(ResNet=args.resnet, gradient_penalty=gradient_penalty, spectral_norm=spectral_norm,
+                 train_set=args.dataset, iter=args.iter,
+                 G_iter=args.g_iter, D_iter=args.d_iter)
+    _WGAN.train(train_loader)
