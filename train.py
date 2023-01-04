@@ -3,8 +3,8 @@ from WGAN_models import WGAN
 from DCGAN_models import DCGAN
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('-m', '--model', type=str, default="DCGAN", choices=['DCGAN', 'WGAN', 'SN_WGAN', 'WGAN_GP'])
-parser.add_argument('-d', '--dataset', type=str, default="MNIST", choices=['MNIST', 'CIFAR', 'FashionMNIST'])
+parser.add_argument('-m', '--model', type=str, default="DCGAN", choices=['DCGAN', 'SN_DCGAN', 'WGAN', 'SN_WGAN', 'WGAN_GP', 'SN_WGAN_GP'])
+parser.add_argument('-d', '--dataset', type=str, default="CIFAR", choices=['MNIST', 'CIFAR', 'FashionMNIST'])
 parser.add_argument('-r', '--resnet', type=bool, default=False)
 parser.add_argument('-i', '--iter', type=int, default=1)
 parser.add_argument('-G', '--g_iter', type=int, default=int(4e4))
@@ -59,7 +59,7 @@ if __name__ == '__main__':
                          train_set=args.dataset, iter=i,
                          G_iter=args.g_iter, D_iter=args.d_iter)
             _WGAN.train(train_loader)
-    else:
+    elif args.model == 'SN_WGAN_GP':
         gradient_penalty = True
         spectral_norm = True
         for i in range(args.iter):
