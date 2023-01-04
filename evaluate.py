@@ -51,7 +51,7 @@ def get_fid_score(dcgan = False, ResNet=False, gradient_penalty=False, spectral_
     return np.array(fid_score).mean(), np.min(np.array(fid_score)), fid_score[-1], np.array(fid_score), \
            np.array(G_losses), np.array(Real_losses), np.array(Fake_losses)
 
-def get_fid_scores(model = 'DCGAN', dataset = 'CIFAR', ii = 20):
+def get_fid_scores(model = 'DCGAN', dataset = 'MNIST', ii = 20):
     fid_scores_mean = []
     fid_scores_min = []
     fid_scores_last = []
@@ -72,7 +72,7 @@ def get_fid_scores(model = 'DCGAN', dataset = 'CIFAR', ii = 20):
             fid_scores_mean.append(fid_score_mean)
             fid_scores_min.append(fid_score_min)
             fid_scores_last.append(fid_score_last)
-            fid_scores.append(fid_score)
+            fid_scores.append(fid_score[:50])
             G_losses.append(G_loss)
             Real_losses.append(Real_loss)
             Fake_losses.append(Fake_loss)
@@ -106,13 +106,13 @@ def save_results():
 def show_fid_score(train_set='CIFAR', iter=40000):
     ii = int(iter / 200)
     path = "Figure/"+'SN_WGAN'+"/"+train_set+"/"+"/fid_scores.npy"
-    snwgan_fid = np.load(path)
+    snwgan_fid = np.load(path, allow_pickle=True)
     snwgan_fid = snwgan_fid.mean(axis=0)[:ii]
     path = "Figure/" + 'WGAN' + "/" + train_set + "/" + "/fid_scores.npy"
-    wgan_fid = np.load(path)
+    wgan_fid = np.load(path, allow_pickle=True)
     wgan_fid = wgan_fid.mean(axis=0)[:ii]
     path = "Figure/" + 'DCGAN' + "/" + train_set + "/" + "/fid_scores.npy"
-    dcgan_fid = np.load(path)
+    dcgan_fid = np.load(path, allow_pickle=True)
     dcgan_fid = dcgan_fid.mean(axis=0)[:ii]
     x1 = np.linspace(0, iter, ii)
     y1 = snwgan_fid
@@ -192,7 +192,7 @@ def show_Discriminator_Losses(dcgan = False, gradient_penalty=False, spectral_no
     real_loss = plt.plot(x4, y4, 'm--', label='Discriminator loss')
     plt.title(title + 'Discriminator Loss')
     plt.xlabel('iteration')
-    plt.ylabel('Generator Loss')
+    plt.ylabel('Discriminator Loss')
     plt.legend()
     plt.show()
 
@@ -267,4 +267,4 @@ def get_results():
     df.to_csv('results_fid.csv')
 
 if __name__ == '__main__':
-    show_Discriminator_Losses()
+    show_fid_score(train_set="CIFAR", iter=40000)
