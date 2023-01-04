@@ -69,9 +69,6 @@ def get_fid_scores(model = 'DCGAN', dataset = 'CIFAR', ii = 20):
         try:
             fid_score_mean, fid_score_min, fid_score_last, fid_score, G_loss, Real_loss, Fake_loss= get_fid_score(dcgan=dcgan, ResNet=False, gradient_penalty=False,
                                                           spectral_norm=spectral_norm, train_set=dataset, iter=i)
-            print(G_loss.shape)
-            print(Real_loss.shape)
-            print(fid_score.shape)
             fid_scores_mean.append(fid_score_mean)
             fid_scores_min.append(fid_score_min)
             fid_scores_last.append(fid_score_last)
@@ -99,94 +96,106 @@ def get_fid_scores(model = 'DCGAN', dataset = 'CIFAR', ii = 20):
     np.save("Figure/" + model + "/" + dataset + "/Real_losses.npy", Real_losses)
     np.save("Figure/" + model + "/" + dataset + "/Fake_losses.npy", Fake_losses)
 
-def show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False, spectral_norm=False, train_set='CIFAR', iter=0):
-    j = 0
-    for i in range(2):
-        # try:
-            _DCGAN = DCGAN(ResNet=ResNet, train_set=train_set, spectral_normal=True, iter=i)
-            epoch, iter, G_losses, fid_score, best_fid, Fake_losses, Real_losses = _DCGAN.load_results()
-            if i == 0:
-                dcgan_fid = np.array(fid_score)
-            else:
-                dcgan_fid += np.array(fid_score)
-            j += 1
-        # except:
-        #     pass
-    dcgan_fid = dcgan_fid / j
-    j = 0
-    for i in range(2):
-        try:
-            _WGAN = WGAN(ResNet=ResNet, gradient_penalty=gradient_penalty, spectral_norm=False, train_set=train_set,
-                           iter=i)
-            epoch, iter, G_losses, fid_score, best_fid, Fake_losses, Real_losses = _WGAN.load_results()
-            if i == 0:
-                wgan_fid = np.array(fid_score)
-            else:
-                wgan_fid += np.array(fid_score)
-            j += 1
-        except:
-            pass
-    wgan_fid = wgan_fid / j
-    j = 0
-    for i in range(1):
-        # try:
-            _SNWGAN = WGAN(ResNet=ResNet, gradient_penalty=gradient_penalty, spectral_norm=True, train_set=train_set, iter=i)
-            epoch, iter, G_losses, fid_score, best_fid, Fake_losses, Real_losses = _SNWGAN.load_results()
-            if i == 0:
-                snwgan_fid = np.array(fid_score)
-            else:
-                snwgan_fid += np.array(fid_score)
-            j += 1
-        # except:
-        #     pass
-    snwgan_fid = snwgan_fid / j
-    print(iter)
-    x1 = np.linspace(0, iter, len(fid_score))
-    # y1 = np.array(_SNWGAN.fid_score)
+def save_results():
+    models = ['DCGAN', 'WGAN', 'SN_WGAN']
+    train_sets = ['CIFAR', 'MNIST', 'FashionMNIST']
+    for model in models:
+        for train_set in train_sets:
+            get_fid_scores(model, train_set)
+
+def show_fid_score(train_set='CIFAR', iter=40000):
+    ii = int(iter / 200)
+    path = "Figure/"+'SN_WGAN'+"/"+train_set+"/"+"/fid_scores.npy"
+    snwgan_fid = np.load(path)
+    snwgan_fid = snwgan_fid.mean(axis=0)[:ii]
+    path = "Figure/" + 'WGAN' + "/" + train_set + "/" + "/fid_scores.npy"
+    wgan_fid = np.load(path)
+    wgan_fid = wgan_fid.mean(axis=0)[:ii]
+    path = "Figure/" + 'DCGAN' + "/" + train_set + "/" + "/fid_scores.npy"
+    dcgan_fid = np.load(path)
+    dcgan_fid = dcgan_fid.mean(axis=0)[:ii]
+    x1 = np.linspace(0, iter, ii)
     y1 = snwgan_fid
-    l1 = plt.plot(x1, y1, 'b--', label='SN WGAN')
-    x2 = np.linspace(0, iter, len(fid_score))
-    # y2 = np.array(_WGAN.fid_score)
+    l1 = plt.plot(x1, y1, 'b--', label='Spectral Normalization WGAN')
+    x2 = np.linspace(0, iter, ii)
     y2 = wgan_fid
     l2 = plt.plot(x2, y2, 'g--', label='WGAN')
-    x3 = np.linspace(0, iter, len(fid_score))
-    # y3 = np.array(_DCGAN.fid_score)
+    x3 = np.linspace(0, iter, ii)
     y3 = dcgan_fid
     l3 = plt.plot(x3, y3, 'r--', label='DCGAN')
     plt.title('FID scores')
-    plt.xlabel('epoch')
+    plt.xlabel('iteration')
     plt.ylabel('fid score')
     plt.legend()
     plt.show()
 
-def show_Losses(dcgan = False, ResNet=False, gradient_penalty=False, spectral_norm=False, train_set='FashionMNIST', iter=0):
+def show_Generator_Losses(dcgan = True, gradient_penalty=False, spectral_norm=False, train_set='CIFAR', iter=0):
+    title = ''
+    path = "Figure/"
     if dcgan:
-        GAN = DCGAN(ResNet=ResNet, train_set=train_set, iter=iter)
-        GAN.load()
+        title += "DCGAN "
+        model = "DCGAN/"
     else:
-        GAN = WGAN(ResNet=ResNet, gradient_penalty=gradient_penalty, spectral_norm=spectral_norm, train_set='FashionMNIST', iter=iter)
-        GAN.load()
-    epoch = GAN.epoch
-    # x = np.linspace(0, epoch, len(GAN.fid_score))
-    # y = np.array(GAN.fid_score)
-    # l1 = plt.plot(x, y, 'r--', label='type1')
-    x1 = np.linspace(0, epoch, len(GAN.G_losses))
-    y1 = np.array(GAN.G_losses)
+        title += "WGAN "
+        model = "WGAN/"
+    if spectral_norm:
+        title = "Spectral Norm " + title
+        model = "SN_" + model
+    if gradient_penalty:
+        title = "Gradient Penalty " + title
+    path += model + train_set + '/' + "G_losses.npy"
+    G_losses = np.load(path, allow_pickle=True)[iter]
+    if train_set == "CIFAR":
+        iter = 40000
+    else:
+        iter = 10000
+    # Generator loss
+    x1 = np.linspace(0, iter, G_losses.shape[0])
+    y1 = np.array(G_losses)
     g_loss = plt.plot(x1, y1, 'r--', label='Generator Loss')
-    # x2 = np.linspace(0, epoch, len(GAN.Fake_losses))
-    # y2 = np.array(GAN.Fake_losses)
-    # fake_loss = plt.plot(x2, y2, 'b--', label='Fake loss')
-    # x3 = np.linspace(0, epoch, len(GAN.Real_losses))
-    # y3 = np.array(GAN.Real_losses)
-    # real_loss = plt.plot(x3, y3, 'g--', label='Real loss')
-    # x4 = np.linspace(0, epoch, len(GAN.Real_losses))
-    # y4 = np.array(GAN.Real_losses) + np.array(GAN.Fake_losses)
-    # real_loss = plt.plot(x4, y4, 'm--', label='Discriminator loss')
-    plt.title('SN WGAN Generator Loss')
-    plt.xlabel('epoch')
+    plt.title(title + 'Generator Loss')
+    plt.xlabel('iteration')
     plt.ylabel('Generator Loss')
     plt.legend()
     plt.show()
+
+def show_Discriminator_Losses(dcgan = False, gradient_penalty=False, spectral_norm=True, train_set='CIFAR', iter=0):
+    title = ''
+    path = "Figure/"
+    if dcgan:
+        title += "DCGAN "
+        model = "DCGAN/"
+    else:
+        title += "WGAN "
+        model = "WGAN/"
+    if spectral_norm:
+        title = "Spectral Norm " + title
+        model = "SN_" + model
+    if gradient_penalty:
+        title = "Gradient Penalty " + title
+    path += model + train_set + '/'
+    Fake_losses = np.load(path + "Fake_losses.npy", allow_pickle=True)[iter]
+    Real_losses = np.load(path + "Real_losses.npy", allow_pickle=True)[iter]
+    if train_set == "CIFAR":
+        iter = 40000
+    else:
+        iter = 10000
+    # Discriminator loss
+    x2 = np.linspace(0, iter, Fake_losses.shape[0])
+    y2 = np.array(Fake_losses)
+    fake_loss = plt.plot(x2, y2, 'b--', label='Fake loss')
+    x3 = np.linspace(0, iter, Real_losses.shape[0])
+    y3 = np.array(Real_losses)
+    real_loss = plt.plot(x3, y3, 'g--', label='Real loss')
+    x4 = np.linspace(0, iter, Real_losses.shape[0])
+    y4 = np.array(Real_losses) + np.array(Fake_losses)
+    real_loss = plt.plot(x4, y4, 'm--', label='Discriminator loss')
+    plt.title(title + 'Discriminator Loss')
+    plt.xlabel('iteration')
+    plt.ylabel('Generator Loss')
+    plt.legend()
+    plt.show()
+
 
 def MKDIR(path):
     try:
@@ -241,88 +250,21 @@ def get_best_model(train_set='FashionMNIST', iters=20):
 
     return best_GAN, which_GAN, fid_dict
 
+def get_results():
+    d = {}
+    root = 'checkpoint/'
+    ganname = ['DCGAN_', 'WGAN_', 'WGAN_GP_', 'SN_WGAN_']
+    dataset = ['MNIST_', 'FashionMNIST_', 'CIFAR_']
+    for data in dataset:
+        for gan in ganname:
+            gan_ = []
+            for i in range(10):
+                path = root + gan + data + str(int(i)) + '/'
+                checkpoint_G = torch.load(path + "G.pth")
+                gan_.append(checkpoint_G["Best FID score"])
+            d[data+gan] = gan_
+    df = pd.DataFrame(data=d)
+    df.to_csv('results_fid.csv')
+
 if __name__ == '__main__':
-    # fid_scores_mean = []
-    # fid_scores_min = []
-    train_set = "CIFAR"
-    # for i in range(10):
-    # show_fid_score(dcgan = False, ResNet=False, gradient_penalty=False,
-    #                            spectral_norm=True, train_set=train_set, iter=1)
-
-    _DCGAN = DCGAN(ResNet=False, train_set=train_set, spectral_normal=True, iter=0)
-    _DCGAN.load_generator()
-    for i, data in enumerate(cifar_test_loader):
-        with torch.no_grad():
-            x = data[0].to(device)
-            batch_size = x.size(0)
-            z = torch.randn((batch_size, 100, 1, 1)).to(device)
-            x_fake = _DCGAN.G(z)
-            fid_score = get_fid(x.cpu(), x_fake.cpu())
-            print(fid_score)
-    # show_Losses(dcgan = False, ResNet=False, gradient_penalty=False,
-    #                            spectral_norm=True, train_set=train_set, iter=0)
-    #     # fid_scores_mean.append(fid_score_mean)
-    #     # fid_scores_min.append(fid_score_min)
-    # best_model, which_model, fid_dict = get_best_model(train_set=train_set)
-    # print(which_model)
-    # print(fid_dict)
-    # models = ["WGAN","SN_WGAN","DCGAN"]
-    # datasets = ["CIFAR", "MNIST", "FashionMNIST"]
-    # for model in models:
-    #     for dataset in datasets:
-    #         # get_fid_scores(model, dataset)
-    #         print(model, dataset)
-    #         G_losses = np.load("Figure/"+model+"/"+dataset+"/G_losses.npy", allow_pickle=True)
-    #         G_losses_new = []
-    #         Real_losses = np.load("Figure/"+model+"/"+dataset+"/Real_losses.npy", allow_pickle=True)
-    #         Real_losses_new = []
-    #         Fake_losses = np.load("Figure/"+model+"/"+dataset+"/Fake_losses.npy", allow_pickle=True)
-    #         Fake_losses_new = []
-    #         print(G_losses.shape, Real_losses.shape, Fake_losses.shape)
-            # for i in range(G_losses.shape[0]):
-            #     try:
-            #         G_loss_new = np.reshape(np.array(G_losses[i][:782782]), (1001, -1))
-            #         G_loss_new = np.average(G_loss_new, axis=1)
-            #         G_losses_new.append(G_loss_new)
-            #         if model == 'DCGAN':
-            #             Real_loss_new = np.reshape(np.array(Real_losses[i][:782782]), (1001, -1))
-            #         else:
-            #             Real_loss_new = np.reshape(np.array(Real_losses[i]), (1001, -1))
-            #         Real_loss_new = np.average(Real_loss_new, axis=1)
-            #         Real_losses_new.append(Real_loss_new)
-            #         if model == 'DCGAN':
-            #             Fake_loss_new = np.reshape(np.array(Fake_losses[i][:782782]), (1001, -1))
-            #         else:
-            #             Fake_loss_new = np.reshape(np.array(Fake_losses[i]), (1001, -1))
-            #         Fake_loss_new = np.average(Fake_loss_new, axis=1)
-            #         Fake_losses_new.append(Fake_loss_new)
-            #     except:
-            #         pass
-            # G_losses_new = np.array(G_losses_new)
-            # Real_losses_new = np.array(Real_losses_new)
-            # Fake_losses_new = np.array(Fake_losses_new)
-            # np.save("Figure/"+model+"/"+dataset+"/G_losses.npy", G_losses_new)
-            # np.save("Figure/" + model + "/" + dataset + "/Real_losses.npy", Real_losses_new)
-            # np.save("Figure/" + model + "/" + dataset + "/Fake_losses.npy", Fake_losses_new)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    show_Discriminator_Losses()
